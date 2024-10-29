@@ -1,9 +1,9 @@
 <?php
-    $post_title = '';
+    $post_title;
     if (isset($_POST['post_title'])) {
         $post_title = htmlspecialchars($_POST['post_title'],ENT_QUOTES, 'UTF-8');
     }
-    $post_text = '';
+    $post_text;
     if (isset($_POST['post_text'])) {
         $post_text = htmlspecialchars($_POST['post_text'],ENT_QUOTES, 'UTF-8');
     }
@@ -23,9 +23,14 @@
 
             <?php
                 $fp = fopen("file_write.txt","a+");
-
-                fwrite($fp, $post_title."\t".$post_text."\n");  // 書き込み処理、ファイルポインタは末尾
-
+                
+                // フォーム入力内容の書き込み
+                // 書き込み処理、入力内容不足の場合は書き込まない処理
+                if ((isset($_POST['post_title'])) && ($_POST['post_title'] != "") && (isset($_POST['post_text'])) && ($_POST['post_text'] != "")){
+                    fwrite($fp, $post_title."：".$post_text."\n");  // ファイルポインタは末尾
+                } else {
+                    print '入力情報が不足しています';
+                }
 
                 // ファイル内容の読み込みと表示
 
@@ -44,12 +49,6 @@
                     print "$l_array[$j]<br>";
                 }
                 print "</p>";
-
-                // フォーム入力内容の書き込み
-                // 入力内容不足の場合は書き込まない処理←入力内容不足の判定条件は？
-
-                //fwrite($fp, $post_title."：".$post_text."\n");  // 書き込み処理
-
 
                 fclose($fp);
             ?>
