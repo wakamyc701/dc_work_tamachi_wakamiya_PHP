@@ -24,12 +24,16 @@
             <input type="submit" value="送信">
 
             <?php
+                
                 //入力情報不足時の処理
-                if ((!isset($_POST['post_title'])) || ($_POST['post_title'] == "") || (!isset($_POST['post_text'])) || ($_POST['post_text'] == "") || (!isset($_FILES['upload_image']))){
+                if ((!isset($_POST['post_title'])) or ($_POST['post_title'] == "") or (!isset($_POST['post_text'])) or ($_POST['post_text'] == "")) {
                     print '入力情報が不足しています';
-                    exit;
                 }
 
+                if (!isset($_FILES['upload_image'])) {
+                    echo 'ファイルが送信されていません';
+                }
+                
                 //画像アップロード
                 $save = 'img/' . basename($_FILES['upload_image']['name']);
 
@@ -37,32 +41,32 @@
                     echo 'アップロード成功しました。';
                 } else {
                     echo 'アップロード失敗しました。';
+                    exit;
                 }
     
                 $fp = fopen("file_write.txt","a+");
                 
                 // フォーム入力内容の書き込み
-                fwrite($fp, $post_title."\t".$post_text."\n");  // ファイルポインタは末尾
+                fwrite($fp, $post_title."\t".$post_text."\t".$_FILES['upload_image']['name']."\n");  // ファイルポインタは末尾
+
 
                 // ファイル内容の読み込みと表示
-
                 fseek($fp, 0);  //ファイルポインタを先頭に
 
                 $l_array = array();
                 $i = 0;
                 while ($line = fgets($fp)) {
                     $strs = explode("\t", $line);
-                    array_unshift($l_array, [$strs[0],$strs[1]]);
+                    array_unshift($l_array, [$strs[0],$strs[1],$strs[2]]);
                     //print "$line<br>";
                     $i++;
                 }
 
                 print "<p>";
                 for ($j = 0 ; $j < $i; $j++) {
-                    print $l_array[$j][0]."：".$l_array[$j][1]."<br>";
+                    print $l_array[$j][0].'：'.$l_array[$j][1].'<img src="img/'.$l_array[$j][2].'" width="25%"><br>';
                 }
                 print "</p>";
-
                 fclose($fp);
             ?>
         </form>
