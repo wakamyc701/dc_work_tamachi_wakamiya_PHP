@@ -1,9 +1,9 @@
 <?php
-    $post_title;
+    $post_title='';
     if (isset($_POST['post_title'])) {
         $post_title = htmlspecialchars($_POST['post_title'],ENT_QUOTES, 'UTF-8');
     }
-    $post_text;
+    $post_text='';
     if (isset($_POST['post_text'])) {
         $post_text = htmlspecialchars($_POST['post_text'],ENT_QUOTES, 'UTF-8');
     }
