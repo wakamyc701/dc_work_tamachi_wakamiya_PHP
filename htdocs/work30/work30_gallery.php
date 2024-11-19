@@ -39,7 +39,7 @@
                 }
                 //結果セットを閉じる
                 $result->close();
-                print '<a href="work30.php">画像投稿ページへ</a>';
+                print '<p><a href="work30.php">画像投稿ページへ</a></p>';
             }
             $db->close();
         ?>
