@@ -30,12 +30,11 @@
 
             //SELECT文の実行
             print '<h3>画像一覧</h3>';
-            $select = "SELECT image_id, image_name FROM w30gallery WHERE public_flg = 0";
+            $select = "SELECT image_id, image_name, public_flg FROM w30gallery WHERE public_flg = 0";
             if ($result = $db->query($select)){
                 //連想配列を取得
                 foreach ($result as $row){
-                    //画像表示するように後で変更する
-                    echo $row["image_id"] . $row["image_name"] . "<br>";
+                    echo $row["image_id"] . $row["image_name"] . '<img src="img/' . $row["image_name"] . '"><br>';
                 }
                 //結果セットを閉じる
                 $result->close();
