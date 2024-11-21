@@ -29,28 +29,55 @@
     <head>
         <meta charset="UTF-8">
         <title>WORK30 画像投稿ページ</title>
+        <style>
+            .err_msg {
+                color: #ff0000;
+            }
+            .success_msg {
+                color: #0000ff;
+            }
+            .gallery_box {
+                display: flex;
+                flex-wrap: wrap;
+            }
+            .gallery_element {
+                width: 320px;
+                text-align: center;
+                margin: 4px;
+                padding: 4px;
+                border: solid 2px #bbbbbb;
+            }
+            .gallery_element_close {
+                background-color: #888888;
+            }
+            .gallery_element img {
+                width: 300px;
+                height: 300px;
+                object-fit: contain;
+            }
+        </style>
     </head>
     <body>
         <h3>画像投稿</h3>
         <?php
             if ($_SESSION['err_msg1'] == 1) {
-                echo '<p style="color:#ff0000">エラー：画像名が送信されていません</p>';
+                echo '<p class="err_msg">エラー：画像名が送信されていません</p>';
                 $_SESSION['err_msg1'] = 0;
             }
             if ($_SESSION['err_msg2'] == 1) {
-                echo '<p style="color:#ff0000">エラー：画像名に半角英数字以外が含まれています<p>';
+                echo '<p class="err_msg">エラー：画像名に半角英数字以外が含まれています<p>';
                 $_SESSION['err_msg2'] = 0;
             }
             if ($_SESSION['err_msg3'] == 1) {
-                echo '<p style="color:#ff0000">エラー：ファイルが送信されていません<p>';
+                echo '<p class="err_msg">エラー：ファイルが送信されていません<p>';
                 $_SESSION['err_msg3'] = 0;
             }
             if ($_SESSION['err_msg4'] == 1) {
-                echo '<p style="color:#ff0000">エラー：画像の形式が「JPEG」「PNG」でありません<p>';
+                echo '<p class="err_msg">エラー：画像の形式が「JPEG」「PNG」でありません<p>';
                 $_SESSION['err_msg4'] = 0;
             }
             if ($_SESSION['post_success'] == 1) {
-                echo '<p style="color:#0000ff">投稿されました<p>';
+                echo '<p class="success_msg">投稿されました<p>';
                 $_SESSION['post_success'] = 0;
             }
         ?>
@@ -101,18 +128,47 @@
                 $db->set_charset("UTF8");
             }
 
-            $select = "SELECT image_id, image_name FROM w30gallery";
+            $select = "SELECT image_id, image_name, public_flg FROM w30gallery ORDER BY image_id";
             if ($result = $db->query($select)){
                 //連想配列を取得
+                echo '<div class="gallery_box">';
+
                 foreach ($result as $row){
-                    //画像表示するように後で変更する
-                    echo $row["image_id"] . $row["image_name"] . '<img src="img/' . $row["image_name"] . '"><br>';
+                    if ($row['public_flg'] == 0){   //表示
+                        echo '<div class="gallery_element">'.$row["image_id"] . '.' . $row["image_name"] . '<br>
+                        <img src="img/' . $row["image_name"].'"><br>';
+                        echo '<form method="post" enctype="multipart/form-data"><button name="change_flg_id" value="'.$row["image_id"].'">非表示にする</button></form>';
+                    } else {    //非表示
+                        echo '<div class="gallery_element gallery_element_close">'.$row["image_id"] . '.' . $row["image_name"] . '<br>
+                        <img src="img/' . $row["image_name"].'"><br>';
+                        echo '<form method="post" enctype="multipart/form-data"><button name="change_flg_id" value="'.$row["image_id"].'">表示する</button></form>';
+                    }
+                    echo '</div>';
                 }
+
+                echo '</div>';
+
                 //結果セットを閉じる
                 $result->close();
             }
 
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+                //表示・非表示の変更の場合
+                $change_flg_id = $_POST['change_flg_id'];
+                if (isset($_POST['change_flg_id'])) {
+                    echo $change_flg_id;
+                    $flg = $mysqli->query("SELECT public_flg FROM w30gallery WHERE image_id = '" . $change_flg_id . "'");
+//                  $flg = "SELECT public_flg FROM w30gallery WHERE image_id = $change_flg_id";
+                    $current_public_flg = $flg['public_flg'][0];
+                    echo $current_public_flg;
+                    if ($current_public_flg == 0) {
+                        echo '非表示にします';
+                    } else {
+                        echo '表示します';
+                    }
+                    exit;
+                }
                 
                 //入力情報が形式に合っているかの確認
                 $isError = 0;
