@@ -157,11 +157,18 @@
                 //表示・非表示の変更の場合
                 $change_flg_id = $_POST['change_flg_id'];
                 if (isset($_POST['change_flg_id'])) {
-                    echo $change_flg_id;
-                    $flg = $mysqli->query("SELECT public_flg FROM w30gallery WHERE image_id = '" . $change_flg_id . "'");
+                    echo "image_id:".$change_flg_id."<br>";
+//                    $flg = "SELECT public_flg FROM w30gallery WHERE image_id = '14'";
+//                    $flg = $db->query("SELECT public_flg FROM w30gallery WHERE image_id = '14'");
+//                    $flg = "SELECT public_flg FROM w30gallery WHERE image_id = '" . $change_flg_id . "'";
+                    $flg = $db->query("SELECT public_flg FROM w30gallery WHERE image_id = '" . $change_flg_id . "'");
 //                  $flg = "SELECT public_flg FROM w30gallery WHERE image_id = $change_flg_id";
-                    $current_public_flg = $flg['public_flg'][0];
-                    echo $current_public_flg;
+
+                    foreach ($flg as $row_flg) {
+                        $current_public_flg = $row_flg['public_flg'];
+                    }
+
+                    echo "public_flg".$current_public_flg."<br>";
                     if ($current_public_flg == 0) {
                         echo '非表示にします';
                     } else {
