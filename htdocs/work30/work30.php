@@ -10,18 +10,7 @@
     $create_datde;
     $update_date;
 
-    /*
-    $post_title;
-    if (isset($_POST['post_title'])) {
-        $post_title = htmlspecialchars($_POST['post_title'],ENT_QUOTES,'UTF-8');
-    };
-    */
-
-//    $tmp = 0;
-
-    // $_SESSIONを使う必要があるのではないか？（投稿時のメッセージ表示のために）
     session_start();
-    
 ?>
 
 <!DOCTYPE html>
@@ -41,7 +30,7 @@
                 flex-wrap: wrap;
             }
             .gallery_element {
-                width: 320px;
+                width: 250px;
                 text-align: center;
                 margin: 4px;
                 padding: 4px;
@@ -51,8 +40,8 @@
                 background-color: #888888;
             }
             .gallery_element img {
-                width: 300px;
-                height: 300px;
+                width: 240px;
+                height: 240px;
                 object-fit: contain;
             }
         </style>
@@ -60,25 +49,16 @@
     <body>
         <h3>画像投稿</h3>
         <?php
-            if ($_SESSION['err_msg1'] == 1) {
-                echo '<p class="err_msg">エラー：画像名が送信されていません</p>';
-                $_SESSION['err_msg1'] = 0;
+//            var_dump($_SESSION['err_msg']);
+            if (count($_SESSION['err_msg']) != 0) { //エラー有り
+                foreach ($_SESSION['err_msg'] as $err_each) {
+                    echo '<p class="err_msg">'.$err_each.'</p>';
+                }
+                $_SESSION['err_msg'] = [];
             }
-            if ($_SESSION['err_msg2'] == 1) {
-                echo '<p class="err_msg">エラー：画像名に半角英数字以外が含まれています<p>';
-                $_SESSION['err_msg2'] = 0;
-            }
-            if ($_SESSION['err_msg3'] == 1) {
-                echo '<p class="err_msg">エラー：ファイルが送信されていません<p>';
-                $_SESSION['err_msg3'] = 0;
-            }
-            if ($_SESSION['err_msg4'] == 1) {
-                echo '<p class="err_msg">エラー：画像の形式が「JPEG」「PNG」でありません<p>';
-                $_SESSION['err_msg4'] = 0;
-            }
-            if ($_SESSION['post_success'] == 1) {
-                echo '<p class="success_msg">投稿されました<p>';
-                $_SESSION['post_success'] = 0;
+            if (isset($_SESSION['suc_msg'])) {
+                echo '<p class="success_msg">'.$_SESSION['suc_msg'].'<p>';
+                $_SESSION['suc_msg'] = null;
             }
         ?>
 
@@ -91,34 +71,6 @@
         <p><a href="work30_gallery.php">画像一覧ページへ</a></p>
 
         <?php
-
-/*
-            //入力情報不足時の処理
-            if ((!isset($_POST['post_title'])) or ($_POST['post_title'] == "")) {
-                //$errmsg1 = $errmsg1 + 1;
-                //$errmsg1 = '画像名が送信されていません';
-                echo 'A画像名が送信されていません';
-            }
-
-       
-            if (!isset($_FILES['upload_image'])) {
-//            if ($_FILES['upload_image']['size'] == 0) {
-                    echo 'Bファイルが送信されていません';
-            }
-*/
-            
-            /*
-            //画像アップロード
-            $save = 'img/' . basename($_FILES['upload_image']['name']);
-        
-            if(move_uploaded_file($_FILES['upload_image']['tmp_name'],$save)){
-                echo 'アップロード成功しました。';
-            } else {
-                echo 'アップロード失敗しました。';
-                exit;
-            }
-            */
-
             //データベースへ接続
             $db = new mysqli($host, $login_user, $password, $database);
             if ($db->connect_error){
@@ -135,17 +87,16 @@
 
                 foreach ($result as $row){
                     if ($row['public_flg'] == 0){   //表示
-                        echo '<div class="gallery_element">'.$row["image_id"] . '.' . $row["image_name"] . '<br>
-                        <img src="img/' . $row["image_name"].'"><br>';
+                        echo '<div class="gallery_element">' . $row["image_name"] . '<br>
+                        <a href="img/'.$row["image_name"].'" target="_blank"><img src="img/' . $row["image_name"].'"></a><br>';
                         echo '<form method="post" enctype="multipart/form-data"><button name="change_flg_id" value="'.$row["image_id"].'">非表示にする</button></form>';
                     } else {    //非表示
-                        echo '<div class="gallery_element gallery_element_close">'.$row["image_id"] . '.' . $row["image_name"] . '<br>
-                        <img src="img/' . $row["image_name"].'"><br>';
+                        echo '<div class="gallery_element gallery_element_close">' . $row["image_name"] . '<br>
+                        <a href="img/'.$row["image_name"].'" target="_blank"><img src="img/' . $row["image_name"].'"></a><br>';
                         echo '<form method="post" enctype="multipart/form-data"><button name="change_flg_id" value="'.$row["image_id"].'">表示する</button></form>';
                     }
                     echo '</div>';
                 }
-
                 echo '</div>';
 
                 //結果セットを閉じる
@@ -158,22 +109,30 @@
                 $change_flg_id = $_POST['change_flg_id'];
                 if (isset($_POST['change_flg_id'])) {
                     echo "image_id:".$change_flg_id."<br>";
-//                    $flg = "SELECT public_flg FROM w30gallery WHERE image_id = '14'";
-//                    $flg = $db->query("SELECT public_flg FROM w30gallery WHERE image_id = '14'");
-//                    $flg = "SELECT public_flg FROM w30gallery WHERE image_id = '" . $change_flg_id . "'";
                     $flg = $db->query("SELECT public_flg FROM w30gallery WHERE image_id = '" . $change_flg_id . "'");
-//                  $flg = "SELECT public_flg FROM w30gallery WHERE image_id = $change_flg_id";
 
                     foreach ($flg as $row_flg) {
                         $current_public_flg = $row_flg['public_flg'];
                     }
 
                     echo "public_flg".$current_public_flg."<br>";
+                    $date = date("Y-m-d");
                     if ($current_public_flg == 0) {
-                        echo '非表示にします';
+                        $hide_image = "UPDATE w30gallery SET public_flg = 1, update_date = '".$date."' WHERE image_id = '" . $change_flg_id . "'";
+                        if ($result_update = $db->query($hide_image)) {
+                            $_SESSION['suc_msg'] = '画像を非表示にしました';
+                        } else {
+                            $_SESSION['err_msg'][] = 'UPDATE実行エラー' . $hide_image;
+                        }
                     } else {
-                        echo '表示します';
+                        $show_image = "UPDATE w30gallery SET public_flg = 0, update_date = '".$date."' WHERE image_id = '" . $change_flg_id . "'";
+                        if ($result_update = $db->query($show_image)) {
+                            $_SESSION['suc_msg'] = '画像を表示にしました';
+                        } else {
+                            $_SESSION['err_msg'][] = 'UPDATE実行エラー' . $show_image;
+                        }
                     }
+                    header('Location: ./work30.php');
                     exit;
                 }
                 
@@ -181,18 +140,17 @@
                 $isError = 0;
 
                 if ((!isset($_POST['post_title'])) or ($_POST['post_title'] == "")) {   //画像名が無い
-                    $_SESSION['err_msg1'] = 1;
+                    $_SESSION['err_msg'][] = 'エラー：画像名が送信されていません';
                     $isError = 1;
                 } elseif (!preg_match("/^[a-zA-Z0-9]+$/", $_POST['post_title'])) {    //画像名に半角英数字以外が含まれる
-                    $_SESSION['err_msg2'] = 1;
+                    $_SESSION['err_msg'][] = 'エラー：画像名に半角英数字以外が含まれています';
                     $isError = 1;
                 }
-
                 if ($_FILES['upload_image']['size'] == 0) { //ファイルが送信されていない
-                    $_SESSION['err_msg3'] = 1;
+                    $_SESSION['err_msg'][] = 'エラー：ファイルが送信されていません';
                     $isError = 1;
                 } elseif (($_FILES['upload_image']['type'] != 'image/jpeg') && ($_FILES['upload_image']['type'] != 'image/png')){   //ファイル形式が異なる
-                    $_SESSION['err_msg4'] = 1;
+                    $_SESSION['err_msg'][] = 'エラー：ファイルの形式が「JPEG」「PNG」でありません';
                     $isError = 1;
                 }
 
@@ -206,9 +164,7 @@
                     } else {
                         $post_title = $_POST['post_title'].".png";
                     }
-                    //echo $post_title;
                     $date = date("Y-m-d");
-                    //echo $date;
 
                     $insert = "INSERT INTO w30gallery(
                         image_name,
@@ -221,6 +177,7 @@
                     );";
 
                     if (!$db->query($insert)){
+                        $_SESSION['err_msg'][] = 'INSERT実行エラー' . $insert;
                         $db->rollback();  //INSERT実行エラーなのでロールバック
                     } else {
                         //画像のアップロード
@@ -228,23 +185,18 @@
 
                         if(move_uploaded_file($_FILES['upload_image']['tmp_name'],$save)){
                             $db->commit();  //アップロード成功
-                            $_SESSION['post_success'] = 1;
-
+                            $_SESSION['suc_msg'] = 'アップロード成功しました';
                         } else {
+                            $_SESSION['err_msg'][] = 'アップロード失敗しました';
                             $db->rollback();    //アップロード失敗なのでロールバック
                         }
-
                     }
-                    
                 }
 
                 header('Location: ./work30.php');
                 exit;
             }
-
-
             $db->close();
         ?>
-
     </body>
 </html>
