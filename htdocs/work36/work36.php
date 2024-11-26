@@ -17,7 +17,7 @@
 <html lang="ja">
     <head>
         <meta charset="UTF-8">
-        <title>WORK30 画像投稿ページ</title>
+        <title>WORK36 画像投稿ページ</title>
         <style>
             .err_msg {
                 color: #ff0000;
