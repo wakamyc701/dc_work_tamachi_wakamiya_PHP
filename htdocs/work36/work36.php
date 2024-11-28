@@ -17,7 +17,7 @@
 <html lang="ja">
     <head>
         <meta charset="UTF-8">
-        <title>WORK36 画像投稿ページ</title>
+        <title>WORK30 画像投稿ページ</title>
         <style>
             .err_msg {
                 color: #ff0000;
@@ -90,12 +90,12 @@
 
                 foreach ($result as $row){
                     if ($row['public_flg'] == 0){   //表示
-                        echo '<div class="gallery_element">' . $row["image_name"] . '<br>
-                        <a href="img/'.$row["image_name"].'" target="_blank"><img src="img/' . $row["image_name"].'"></a><br>';
+//                        echo '<div class="gallery_element">' . $row["image_name"] . '<br><a href="img/' . $row["image_name"] . '" target="_blank"><img src="img/' . $row["image_name"] . '"></a><br>';
+                        echo '<div class="gallery_element">' . $row["image_name"] . '<br><img src="img/' . $row["image_name"] . '"><br>';
                         echo '<form method="post" enctype="multipart/form-data"><button name="change_flg_id" value="'.$row["image_id"].'">非表示にする</button></form>';
                     } else {    //非表示
-                        echo '<div class="gallery_element gallery_element_close">' . $row["image_name"] . '<br>
-                        <a href="img/'.$row["image_name"].'" target="_blank"><img src="img/' . $row["image_name"].'"></a><br>';
+//                        echo '<div class="gallery_element gallery_element_close">' . $row["image_name"] . '<br><a href="img/' . $row["image_name"] . '" target="_blank"><img src="img/' . $row["image_name"] . '"></a><br>';
+                        echo '<div class="gallery_element gallery_element_close">' . $row["image_name"] . '<br><img src="img/' . $row["image_name"] . '"><br>';
                         echo '<form method="post" enctype="multipart/form-data"><button name="change_flg_id" value="'.$row["image_id"].'">表示する</button></form>';
                     }
                     echo '</div>';
@@ -135,8 +135,9 @@
                             $_SESSION['err_msg'][] = 'UPDATE実行エラー' . $show_image;
                         }
                     }
+                    $db->close();
                     header('Location: ./work30.php');
-                    exit;
+                    exit();
                 }
                 
                 //入力情報が形式に合っているかの確認
@@ -195,9 +196,9 @@
                         }
                     }
                 }
-
+                $db->close();
                 header('Location: ./work30.php');
-                exit;
+                exit();
             }
             $db->close();
         ?>

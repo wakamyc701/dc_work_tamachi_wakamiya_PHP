@@ -65,7 +65,7 @@
             }
         ?>
 
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" id="img_post">
             <p>画像名：<input type="text" name="post_title">　※半角英数字のみ使用してください</p>
             <p>画像　：<input type="file" name="upload_image">※投稿できる画像の形式は「JPEG」「PNG」のみです</p>
             <input type="submit" value="画像投稿">
@@ -90,13 +90,15 @@
 
                 foreach ($result as $row){
                     if ($row['public_flg'] == 0){   //表示
-                        echo '<div class="gallery_element">' . $row["image_name"] . '<br>
-                        <a href="img/'.$row["image_name"].'" target="_blank"><img src="img/' . $row["image_name"].'"></a><br>';
-                        echo '<form method="post" enctype="multipart/form-data"><button name="change_flg_id" value="'.$row["image_id"].'">非表示にする</button></form>';
+//                        echo '<div class="gallery_element">' . $row["image_name"] . '<br><a href="img/' . $row["image_name"] . '" target="_blank"><img src="img/' . $row["image_name"] . '"></a><br>';
+                        echo '<p><div class="gallery_element">' .$row['public_flg']. $row["image_name"] . '</p><p><img src="img/' . $row["image_name"] . '"></p>';
+//                        echo '<form method="post" enctype="multipart/form-data"><button name="change_flg_id" value="'.$row["image_id"].'">非表示にする</button></form>';
+                        echo '<p><button form="img_post" name="change_flg_id" value="'.$row["image_id"].'">非表示にする</button></p>';
                     } else {    //非表示
-                        echo '<div class="gallery_element gallery_element_close">' . $row["image_name"] . '<br>
-                        <a href="img/'.$row["image_name"].'" target="_blank"><img src="img/' . $row["image_name"].'"></a><br>';
-                        echo '<form method="post" enctype="multipart/form-data"><button name="change_flg_id" value="'.$row["image_id"].'">表示する</button></form>';
+//                           echo '<div class="gallery_element gallery_element_close">' . $row["image_name"] . '<br><a href="img/' . $row["image_name"] . '" target="_blank"><img src="img/' . $row["image_name"] . '"></a><br>';
+                        echo '<p><div class="gallery_element gallery_element_close">' .$row['public_flg']. $row["image_name"] . '</p><p><img src="img/' . $row["image_name"] . '"></p>';
+//                        echo '<form method="post" enctype="multipart/form-data"><button name="change_flg_id" value="'.$row["image_id"].'">表示する</button></form>';
+                        echo '<p><button form="img_post" name="change_flg_id" value="'.$row["image_id"].'">表示する</button></p>';
                     }
                     echo '</div>';
                 }
@@ -136,7 +138,7 @@
                         }
                     }
                     header('Location: ./work30.php');
-                    exit;
+                    exit();
                 }
                 
                 //入力情報が形式に合っているかの確認
@@ -195,9 +197,8 @@
                         }
                     }
                 }
-
                 header('Location: ./work30.php');
-                exit;
+                exit();
             }
             $db->close();
         ?>
