@@ -55,13 +55,13 @@
                 foreach ($result as $row){
                     if ($row['public_flg'] == 0){   //表示
                         echo '<div class="gallery_element">' . $row["image_name"] . '<br>
-                        <a href="img/'.$row["image_name"].'" target="_blank"><img src="img/' . $row["image_name"].'"></a></div>';
+                        <a href="../work30/img/'.$row["image_name"].'" target="_blank"><img src="../work30/img/' . $row["image_name"].'"></a></div>';
                     }
                 }
                 echo '</div>';
                 //結果セットを閉じる
                 $result->close();
-                print '<p><a href="work30.php">画像投稿ページへ</a></p>';
+                print '<p><a href="work36.php">画像投稿ページへ</a></p>';
             }
             $db->close();
         ?>
