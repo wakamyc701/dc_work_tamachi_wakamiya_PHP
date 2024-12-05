@@ -151,6 +151,9 @@
         <meta charset="UTF-8">
         <title>WORK36 画像投稿ページ</title>
         <style>
+            h1 {
+                font-size: 1.5em;
+            }
             .err_msg {
                 color: #ff0000;
             }
@@ -179,7 +182,7 @@
         </style>
     </head>
     <body>
-        <h3>画像投稿</h3>
+        <h1>画像投稿</h1>
         <?php
             function display_msg() {   //投稿後・フラグ変更後のメッセージ表示
                 if (count($_SESSION['err_msg']) != 0) { //エラー有り
@@ -211,12 +214,9 @@
         <p><a href="work36_gallery.php">画像一覧ページへ</a></p>
 
         <?php
-            $select = "SELECT image_id, image_name, public_flg FROM w30gallery ORDER BY image_id";
-            if ($result = $db->query($select)){
-                //連想配列を取得
+            function display_gallery($result) { //画像一覧表示
                 echo '<div class="gallery_box">';
-
-                foreach ($result as $row){
+                foreach ($result as $row){  //連想配列を取得
                     if ($row['public_flg'] == 0){   //表示
                         echo '<div class="gallery_element">' . $row["image_name"] . '<br><a href="../work30/img/' . $row["image_name"] . '" target="_blank"><img src="../work30/img/' . $row["image_name"] . '"></a><br>';
                         echo '<button form="img_post" name="change_flg_id" value="'.$row["image_id"].'">非表示にする</button>';
@@ -227,9 +227,13 @@
                     echo '</div>';
                 }
                 echo '</div>';
+            }
 
+            $select = "SELECT image_id, image_name, public_flg FROM w30gallery ORDER BY image_id";
+            if ($result = $db->query($select)){
+                display_gallery($result);
                 //結果セットを閉じる
-//                $result->close();
+                //$result->close();
             }
         ?>
     </body>
