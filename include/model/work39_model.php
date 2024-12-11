@@ -190,3 +190,45 @@ function check_post($db){
         exit();
     }
 }
+
+/**
+ * 画像投稿／表示・非表示フラグ変更後のメッセージ表示
+ */
+function display_msg() {
+    if (count($_SESSION['err_msg']) != 0) { //エラー有り
+        foreach ($_SESSION['err_msg'] as $err_each) {
+            echo '<p class="err_msg">'.$err_each.'</p>';
+        }
+        $_SESSION['err_msg'] = [];
+    }
+    if (isset($_SESSION['suc_msg'])) {
+        echo '<p class="success_msg">'.$_SESSION['suc_msg'].'<p>';
+        $_SESSION['suc_msg'] = null;
+    }
+}
+
+/**
+ * 画像一覧の表示
+ * 
+ * @param var $result 表示内容の結果セット
+ * @param string $current_page 画像投稿ページならpost、画像一覧ページならgallery
+ */
+function display_gallery($result, $current_page) { //画像一覧表示
+    echo '<div class="gallery_box">';
+    foreach ($result as $row){  //連想配列を取得
+        if ($row['public_flg'] == 0){   //表示
+            echo '<div class="gallery_element">' . $row["image_name"] . '<br><a href="../work30/img/' . $row["image_name"] . '" target="_blank"><img src="../work30/img/' . $row["image_name"] . '"></a>';
+            if ($current_page == 'post'){
+                echo '<br><button form="img_post" name="change_flg_id" value="'.$row["image_id"].'">非表示にする</button>';
+            }
+            echo '</div>';
+        } else{   //非表示
+            if ($current_page == 'post') {
+                echo '<div class="gallery_element gallery_element_close">'. $row["image_name"] . '<br><a href="../work30/img/' . $row["image_name"] . '" target="_blank"><img src="../work30/img/' . $row["image_name"] . '"></a>';
+                echo '<br><button form="img_post" name="change_flg_id" value="'.$row["image_id"].'">表示する</button>';
+                echo '</div>';
+            }
+        }
+    }
+    echo '</div>';
+}

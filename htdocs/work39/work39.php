@@ -15,4 +15,5 @@ try{
 
 //    $db->close();
 
+$current_page = 'post';
 include_once '../../include/view/work39_view.php';
