@@ -1,7 +1,5 @@
 <?php
 
-//require_once '../../include/config/const.php';
-
 $user_id;
 $user_name;
 $password;
