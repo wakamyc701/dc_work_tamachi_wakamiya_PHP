@@ -2,7 +2,9 @@
 <html lang="ja">
     <head>
         <meta charset="UTF-8">
-        <link rel="stylesheet" href="ec_style.css">
+        <?php
+        include_once ('../../include/view/ec_style.php');
+        ?>
         <title>ECサイト トップページ</title>
     </head>
     <body>
@@ -11,8 +13,11 @@
         ?>
 
         <main>
-            <h2>ログイン</h2>
-
+            <h2 class="title">ログイン</h2>
+            <?php
+            include_once('../../include/view/ec_form.php');
+            ?>
+            <a href="">新規ユーザー登録はこちらから</a>
         </main>
     </body>
 </html>
