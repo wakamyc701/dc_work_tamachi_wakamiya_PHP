@@ -7,7 +7,8 @@
     }
 
     header {
-        background-color: #65318e;
+        background-color: #4F2469;
+        /* 挿し色使うなら#711D1D*/
         color: #e7e7eb;
         font-weight: bold;
     }
@@ -31,22 +32,52 @@
 
     .header-box {
         display: flex;
-        margin: 0;
+        margin: auto 0;
         padding: 10px 20px;
         column-gap: 10px;
     }
 
     .header-box li {
+        font-size: 20px;
         list-style: none;
         margin: auto 0;
+        text-decoration: none;
     }
 
     .header-box li:nth-of-type(1){
         margin-right: auto;
     }
 
+    .header-box a {
+        text-decoration: none;
+    }
+
     .title {
         margin-top: 50px;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
+    }
+
+    .err_msg {
+        display: inline-block;
+        width: 360px;
+        height: 40px;
+        line-height: 40px;
+        margin: 0;
+        background-color: #ebccff;
+        font-weight: bold;
+    }
+
+    .form_btn {
+        margin-top: 10px;
+        margin-bottom: 24px;
+        width: 180px;
+        height: 30px;
+        border: 0;
+        border-radius: 5px;
+        background-color: #9845cc;
+        box-shadow: 2px 2px #261133;
+        color: #e7e7eb;
+        font-size: 16px;
+        font-weight: bold;
     }
 </style>

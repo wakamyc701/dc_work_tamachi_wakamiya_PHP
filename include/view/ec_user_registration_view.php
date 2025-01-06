@@ -5,7 +5,7 @@
         <?php
         include_once ('../../include/view/ec_style.php');
         ?>
-        <title>ECサイト トップページ</title>
+        <title>ECサイト ユーザー登録ページ</title>
     </head>
     <body>
         <?php
@@ -13,12 +13,12 @@
         ?>
 
         <main>
-            <h2 class="title">ログイン</h2>
+            <h2 class="title">ユーザー登録</h2>
             <?php
             include_once('../../include/view/ec_err_msg.php');
             include_once('../../include/view/ec_form.php');
             ?>
-            <a href="user_registration.php">新規ユーザー登録はこちらから</a>
+            <a href="index.php">ログインページへ</a>
         </main>
     </body>
 </html>

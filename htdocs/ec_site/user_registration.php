@@ -7,11 +7,12 @@ require_once '../../include/model/ec_model.php';
 
 $_SESSION['err_msg'] = '';
 
+
 try{
     $db = connect_db();
     $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
     // echo 'データベース接続成功';
-    login_check($db);
+    login_check($db);   //ここを別の関数にするのよ
 } catch (PDOException $e){
     echo $e->getMessage();
     exit();
@@ -23,7 +24,7 @@ $links = [
     "リンクB" => "index.php",
 ];*/
 $links = [];    //ヘッダ内リンクが無い場合
-$btn_title = 'ログインする';
+$btn_title = 'ユーザー登録する';
 
-include ('../../include/view/ec_index_view.php');
+include ('../../include/view/ec_user_registration_view.php');
 
