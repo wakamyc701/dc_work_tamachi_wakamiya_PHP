@@ -18,7 +18,7 @@
             include_once('../../include/view/ec_err_msg.php');
             include_once('../../include/view/ec_form.php');
             ?>
-            <a href="user_registration.php">新規ユーザー登録はこちらから</a>
+            <a href="registration.php">新規ユーザー登録はこちらから</a>
         </main>
     </body>
 </html>

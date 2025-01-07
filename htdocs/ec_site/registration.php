@@ -12,7 +12,7 @@ try{
     $db = connect_db();
     $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
     // echo 'データベース接続成功';
-    login_check($db);   //ここを別の関数にするのよ
+    user_registration($db);
 } catch (PDOException $e){
     echo $e->getMessage();
     exit();
@@ -26,5 +26,5 @@ $links = [
 $links = [];    //ヘッダ内リンクが無い場合
 $btn_title = 'ユーザー登録する';
 
-include ('../../include/view/ec_user_registration_view.php');
+include ('../../include/view/ec_registration_view.php');
 

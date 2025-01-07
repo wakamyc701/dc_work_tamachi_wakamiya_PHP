@@ -30,6 +30,10 @@
         color: inherit;
     }
 
+    li {
+        list-style: none;
+    }
+
     .header-box {
         display: flex;
         margin: auto 0;
@@ -57,12 +61,21 @@
         margin-bottom: 20px;
     }
 
+    .caution_msg {
+        display: block;
+        margin: 5px auto;
+        width:720px;
+        height: 60px;
+        line-height: 30px;
+        background-color: #bbbbbb;
+    }
+
     .err_msg {
-        display: inline-block;
+        display: block;
         width: 360px;
         height: 40px;
         line-height: 40px;
-        margin: 0;
+        margin: 0 auto;
         background-color: #ebccff;
         font-weight: bold;
     }
