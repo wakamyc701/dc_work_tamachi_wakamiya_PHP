@@ -19,7 +19,7 @@
                 パスワードは「8文字以上」かつ「半角英数字とアンダースコア（_）」のみ登録可能です。</p>
             </div>
             <?php
-            include_once('../../include/view/ec_err_msg.php');
+            include_once('../../include/view/ec_result_msg.php');
             include_once('../../include/view/ec_form.php');
             ?>
             <a href="index.php">ログインページへ</a>

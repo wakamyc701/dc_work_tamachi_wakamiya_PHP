@@ -67,16 +67,26 @@
         width:720px;
         height: 60px;
         line-height: 30px;
-        background-color: #bbbbbb;
+        background-color: #f5e56b;
     }
 
     .err_msg {
         display: block;
-        width: 360px;
+        width: 720px;
         height: 40px;
         line-height: 40px;
         margin: 0 auto;
-        background-color: #ebccff;
+        background-color: #f2a0a1;
+        font-weight: bold;
+    }
+
+    .suc_msg {
+        display: block;
+        width: 720px;
+        height: 40px;
+        line-height: 40px;
+        margin: 0 auto;
+        background-color: #c1e4e9;
         font-weight: bold;
     }
 

@@ -5,7 +5,7 @@
         <?php
         include_once ('../../include/view/ec_style.php');
         ?>
-        <title>ECサイト トップページ</title>
+        <title>ECサイト 商品一覧ページ</title>
     </head>
     <body>
         <?php
@@ -13,12 +13,11 @@
         ?>
 
         <main>
-            <h2 class="title">ログイン</h2>
+            <h2 class="title">商品一覧（ただいま工事中！）</h2>
             <?php
             include_once('../../include/view/ec_result_msg.php');
-            include_once('../../include/view/ec_form.php');
             ?>
-            <a href="registration.php">新規ユーザー登録はこちらから</a>
+            <a href="logout.php">ログアウトする</a>
         </main>
     </body>
 </html>

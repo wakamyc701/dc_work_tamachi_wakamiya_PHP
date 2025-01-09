@@ -52,6 +52,7 @@ function get_date(){
  * index.phpにて使用
  * 
  * @param $db
+ * @return string
  */
 function login_check($db){
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -63,22 +64,31 @@ function login_check($db){
         $result = $stmt->fetch();
         //var_dump($result);
         if ($result == false) {
-            $_SESSION['err_msg']='登録されていないユーザー名です。';
+            //$_SESSION['err_msg']='登録されていないユーザー名です。';
             echo '登録されていないユーザー名です。';
+            $result_msg['err_msg'] = '登録されていないユーザー名です。';
+            return $result_msg;
         } elseif (strcmp($result['user_password'], $user_password) != 0) {
-            $_SESSION['err_msg']='パスワードが異なります。';
+            //$_SESSION['err_msg']='パスワードが異なります。';
             echo 'パスワードが異なります。';
+            $result_msg['err_msg'] = 'パスワードが異なります。';
+            return $result_msg;
         } else {
-            $_SESSION['err_msg'] = '';
+            //$_SESSION['err_msg'] = '';
             $_SESSION['user_id'] = $result['user_id'];
             if ($result['user_id'] === '1') { //管理用ユーザーによるログイン
                 echo 'adminさん、ようこそ！';
                 //商品管理ページへ
+                header('Location: manage.php');
+                exit();
             } else {    //一般ユーザーによるログイン
                 echo 'ようこそ！<br>';
                 echo 'ID:' . $result["user_id"] . '<br>';
                 echo 'password:' . $result["user_password"];
+                $_SESSION['user_id'] = $result["user_id"];
                 //商品一覧ページへ
+                header('Location: catalog.php');
+                exit();
             }
         }
     }
@@ -89,6 +99,7 @@ function login_check($db){
  * registration.phpにて使用
  * 
  * @param $db
+ * @return string
  */
 function user_registration($db) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -96,17 +107,21 @@ function user_registration($db) {
         $user_password = $_POST['user_password'];
 
         if (!preg_match("/^\w{5,}$/", $user_name)) {    //ユーザー名のバリデーションチェック
-            $_SESSION['err_msg']='ユーザー名が不正です。';
+            //$_SESSION['err_msg']='ユーザー名が不正です。';
             echo 'ユーザー名が不正です。';
+            $result_msg['err_msg'] = 'ユーザー名が不正です。';
+            return $result_msg;
         } elseif (!preg_match("/^\w{8,}$/", $user_password)) {  //パスワードのバリデーションチェック
-            $_SESSION['err_msg']='パスワードが不正です。';
+            //$_SESSION['err_msg']='パスワードが不正です。';
             echo 'パスワードが不正です。';
+            $result_msg['err_msg'] = 'パスワードが不正です。';
+            return $result_msg;
         } else {
             $sql = "INSERT INTO " .DB_USER. " (
                 user_name,
                 user_password,
                 create_date,
-                update,date
+                update_date
                 ) VALUES (
                 '$user_name',
                 '$user_password',
@@ -114,6 +129,26 @@ function user_registration($db) {
                 '".get_date()."'
                 )";
             echo $sql;
+
+            try {
+                $stmt = $db->query($sql);
+                //echo '<p class="suc_msg">ユーザー登録が完了しました。</p>';
+                $result_msg['suc_msg'] = 'ユーザー登録が完了しました。';
+                return $result_msg;
+            } catch (PDOException $e){
+                echo $e->getMessage();
+                print_r($db->errorInfo());
+                $errinfo = $db->errorInfo();
+                if ($errinfo[1] == '1062') {
+                    //$_SESSION['err_msg'] = '登録できないユーザー名です。';
+                    $result_msg['err_msg'] = '登録できないユーザー名です。';
+                    return $result_msg;
+                } else {
+                    //$_SESSION['err_msg'] = '申し訳ございません。再度お試しください。';
+                    $result_msg['err_msg'] = '申し訳ございません。再度お試しください。';
+                    return $result_msg;
+                }
+            }
         }
     }
 }

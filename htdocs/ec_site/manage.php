@@ -1,8 +1,8 @@
 <?php
 session_start();
 
-if (!empty($_SESSION['user_id'])) {
-    header('Location: catalog.php');
+if ($_SESSION['user_id'] !== '1')  {
+    header('Location: index.php');
     exit;
 }
 
@@ -10,14 +10,13 @@ require_once '../../include/config/const.php';
 
 require_once '../../include/model/ec_model.php';
 
-
 $result_msg = [];
 
 try{
     $db = connect_db();
     $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
     // echo 'データベース接続成功';
-    $result_msg = login_check($db);
+    //$result_msg = なんか($db);
 } catch (PDOException $e){
     echo $e->getMessage();
     exit();
@@ -29,7 +28,6 @@ $links = [
     "リンクB" => "index.php",
 ];*/
 $links = [];    //ヘッダ内リンクが無い場合
-$btn_title = 'ログインする';
 
-include ('../../include/view/ec_index_view.php');
+include ('../../include/view/ec_manage_view.php');
 

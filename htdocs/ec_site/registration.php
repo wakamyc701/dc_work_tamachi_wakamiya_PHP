@@ -1,6 +1,11 @@
 <?php
 session_start();
 
+if (!empty($_SESSION['user_id'])) {
+    header('Location: catalog.php');
+    exit;
+}
+
 require_once '../../include/config/const.php';
 
 require_once '../../include/model/ec_model.php';
@@ -12,11 +17,11 @@ try{
     $db = connect_db();
     $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
     // echo 'データベース接続成功';
-    user_registration($db);
 } catch (PDOException $e){
     echo $e->getMessage();
     exit();
 }
+$result_msg = user_registration($db);
 
 /* ヘッダ内のリンクは以下のように記述
 $links = [
