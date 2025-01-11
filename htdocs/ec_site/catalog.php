@@ -18,7 +18,7 @@ try{
 }
 
 $links = [
-    "ログアウト" => "logout.php",
+    "ログアウト" => "logout.php"
 ];
 //$links = [];    //ヘッダ内リンクが無い場合
 

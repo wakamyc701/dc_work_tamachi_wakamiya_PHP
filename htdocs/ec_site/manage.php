@@ -22,12 +22,10 @@ try{
     exit();
 }
 
-/* ヘッダ内のリンクは以下のように記述
 $links = [
-    "リンクA" => "index.php",
-    "リンクB" => "index.php",
-];*/
-$links = [];    //ヘッダ内リンクが無い場合
+    "ログアウト" => "logout.php"
+];
+//$links = [];    //ヘッダ内リンクが無い場合
 
 include ('../../include/view/ec_manage_view.php');
 

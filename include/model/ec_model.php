@@ -10,6 +10,7 @@ $order_id;
 $product_id;
 $product_qty;
 $product_name;
+$product_filename;
 $price;
 $public_flg;
 $image_id;
@@ -65,29 +66,27 @@ function login_check($db){
         //var_dump($result);
         if ($result == false) {
             //$_SESSION['err_msg']='登録されていないユーザー名です。';
-            echo '登録されていないユーザー名です。';
+            //echo '登録されていないユーザー名です。';
             $result_msg['err_msg'] = '登録されていないユーザー名です。';
             return $result_msg;
         } elseif (strcmp($result['user_password'], $user_password) != 0) {
             //$_SESSION['err_msg']='パスワードが異なります。';
-            echo 'パスワードが異なります。';
+            //echo 'パスワードが異なります。';
             $result_msg['err_msg'] = 'パスワードが異なります。';
             return $result_msg;
         } else {
             //$_SESSION['err_msg'] = '';
             $_SESSION['user_id'] = $result['user_id'];
+            $_SESSION['user_name'] = $user_name;
             if ($result['user_id'] === '1') { //管理用ユーザーによるログイン
-                echo 'adminさん、ようこそ！';
-                //商品管理ページへ
-                header('Location: manage.php');
+                //echo 'adminさん、ようこそ！';
+                header('Location: manage.php'); //商品管理ページへ
                 exit();
             } else {    //一般ユーザーによるログイン
-                echo 'ようこそ！<br>';
-                echo 'ID:' . $result["user_id"] . '<br>';
-                echo 'password:' . $result["user_password"];
-                $_SESSION['user_id'] = $result["user_id"];
-                //商品一覧ページへ
-                header('Location: catalog.php');
+                //echo 'ようこそ！<br>';
+                //echo 'ID:' . $result["user_id"] . '<br>';
+                //echo 'password:' . $result["user_password"];
+                header('Location: catalog.php');    //商品一覧ページへ
                 exit();
             }
         }
@@ -108,13 +107,13 @@ function user_registration($db) {
 
         if (!preg_match("/^\w{5,}$/", $user_name)) {    //ユーザー名のバリデーションチェック
             //$_SESSION['err_msg']='ユーザー名が不正です。';
-            echo 'ユーザー名が不正です。';
-            $result_msg['err_msg'] = 'ユーザー名が不正です。';
+            //echo 'ユーザー名が不正です。';
+            $result_msg['err_msg'] = '登録できないユーザー名です。';
             return $result_msg;
         } elseif (!preg_match("/^\w{8,}$/", $user_password)) {  //パスワードのバリデーションチェック
             //$_SESSION['err_msg']='パスワードが不正です。';
-            echo 'パスワードが不正です。';
-            $result_msg['err_msg'] = 'パスワードが不正です。';
+            //echo 'パスワードが不正です。';
+            $result_msg['err_msg'] = '登録できないパスワードです。';
             return $result_msg;
         } else {
             $sql = "INSERT INTO " .DB_USER. " (

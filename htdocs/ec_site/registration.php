@@ -10,8 +10,7 @@ require_once '../../include/config/const.php';
 
 require_once '../../include/model/ec_model.php';
 
-$_SESSION['err_msg'] = '';
-
+$result_msg = [];
 
 try{
     $db = connect_db();

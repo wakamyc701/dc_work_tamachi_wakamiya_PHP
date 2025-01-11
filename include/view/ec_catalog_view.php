@@ -17,7 +17,6 @@
             <?php
             include_once('../../include/view/ec_result_msg.php');
             ?>
-            <a href="logout.php">ログアウトする</a>
         </main>
     </body>
 </html>
