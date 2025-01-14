@@ -1,6 +1,6 @@
 <header>
     <ul class="header-upper">
-        <li><h1>ECサイト！！！！！</h1></li>
+        <li><h1>わがしやさん！！！！！</h1></li>
         <?php
         foreach ($links as $link_title => $link_url){
             echo '<li><a href="' . $link_url .'">' . $link_title . '</a></li>';

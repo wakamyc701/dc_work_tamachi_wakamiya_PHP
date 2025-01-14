@@ -41,6 +41,39 @@
         list-style: none;
     }
 
+    table {
+        margin-top: 30px;
+        border: 1px solid #000000;
+    }
+
+    th, td {
+        border: 1px solid #555555;
+    }
+
+    th:nth-child(1) {
+        width: 300px;
+    }
+
+    th:nth-child(2) {
+        width: 150px;
+    }
+
+    th:nth-child(3) {
+        width: 100px;
+    }
+
+    th:nth-child(4) {
+        width: 200px;
+    }
+
+    th:nth-child(5) {
+        width: 150px;
+    }
+    
+    th:nth-child(6) {
+        width: 100px;
+    }
+
     .header-upper {
         background-color: #4F2469;
         display: flex;
@@ -82,6 +115,17 @@
         width: 720px;
         display: block;
         margin: 0 auto;
+    }
+
+    .wrapper_main {
+        width: 90%;
+        max-width: 1080px;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .align-left {
+        text-align: left;
     }
 
     .caution_msg {

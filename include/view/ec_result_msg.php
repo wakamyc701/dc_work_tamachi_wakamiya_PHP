@@ -6,3 +6,4 @@ if (!empty($result_msg['err_msg'])) {
 if (!empty($result_msg['suc_msg'])) {
     echo '<p class="suc_msg">' . $result_msg['suc_msg'] . '</p>';
 }
+

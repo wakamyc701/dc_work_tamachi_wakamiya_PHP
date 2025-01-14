@@ -22,6 +22,8 @@ try{
     exit();
 }
 
+$result_msg = post_manage();
+
 $links = [
     "ログアウト" => "logout.php"
 ];
