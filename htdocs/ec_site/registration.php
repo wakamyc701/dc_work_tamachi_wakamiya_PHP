@@ -10,7 +10,7 @@ require_once '../../include/config/const.php';
 
 require_once '../../include/model/ec_model.php';
 
-$result_msg = [];
+clr_msg();
 
 try{
     $db = connect_db();
@@ -20,7 +20,7 @@ try{
     echo $e->getMessage();
     exit();
 }
-$result_msg = user_registration($db);
+user_registration($db);
 
 /* ヘッダ内のリンクは以下のように記述
 $links = [

@@ -48,6 +48,32 @@ function get_date(){
 }
 
 /**
+ * エラーメッセージを格納
+ * @param string
+ */
+function err_msg ($msg) {
+    $_SESSION['err_msg'] = $msg;
+    $_SESSION['suc_msg'] = '';
+}
+
+/**
+ * 成功メッセージを格納
+ * @param string
+ */
+function suc_msg ($msg) {
+    $_SESSION['err_msg'] = '';
+    $_SESSION['suc_msg'] = $msg;
+}
+
+/**
+ * エラー・成功メッセージをクリア
+ */
+function clr_msg () {
+    $_SESSION['err_msg'] = '';
+    $_SESSION['suc_msg'] = '';
+}
+
+/**
  * ログインフォームの内容をデータベースと照合し、ページ遷移
  * index.phpにて使用
  * 
@@ -64,27 +90,16 @@ function login_check($db){
         $result = $stmt->fetch();
         //var_dump($result);
         if ($result == false) {
-            //$_SESSION['err_msg']='登録されていないユーザー名です。';
-            //echo '登録されていないユーザー名です。';
-            $result_msg['err_msg'] = '登録されていないユーザー名です。';
-            return $result_msg;
+            err_msg('登録されていないユーザー名です。');
         } elseif (strcmp($result['user_password'], $user_password) != 0) {
-            //$_SESSION['err_msg']='パスワードが異なります。';
-            //echo 'パスワードが異なります。';
-            $result_msg['err_msg'] = 'パスワードが異なります。';
-            return $result_msg;
+            err_msg('パスワードが異なります。');
         } else {
-            //$_SESSION['err_msg'] = '';
             $_SESSION['user_id'] = $result['user_id'];
             $_SESSION['user_name'] = $user_name;
             if ($result['user_id'] === '1') { //管理用ユーザーによるログイン
-                //echo 'adminさん、ようこそ！';
                 header('Location: manage.php'); //商品管理ページへ
                 exit();
             } else {    //一般ユーザーによるログイン
-                //echo 'ようこそ！<br>';
-                //echo 'ID:' . $result["user_id"] . '<br>';
-                //echo 'password:' . $result["user_password"];
                 header('Location: catalog.php');    //商品一覧ページへ
                 exit();
             }
@@ -105,37 +120,25 @@ function user_registration($db) {
         $user_password = $_POST['user_password'];
 
         if (!preg_match("/^\w{5,}$/", $user_name)) {    //ユーザー名のバリデーションチェック
-            //$_SESSION['err_msg']='ユーザー名が不正です。';
-            //echo 'ユーザー名が不正です。';
-            $result_msg['err_msg'] = '登録できないユーザー名です。';
-            return $result_msg;
+            err_msg('登録できないユーザー名です。');
         } elseif (!preg_match("/^\w{8,}$/", $user_password)) {  //パスワードのバリデーションチェック
-            //$_SESSION['err_msg']='パスワードが不正です。';
-            //echo 'パスワードが不正です。';
-            $result_msg['err_msg'] = '登録できないパスワードです。';
-            return $result_msg;
+            err_msg('登録できないパスワードです。');
         } else {
             $sql = "INSERT INTO " .DB_USER. " (user_name, user_password, create_date, update_date) 
                 VALUES ('$user_name', '$user_password', '".get_date()."', '".get_date()."' )";
-            echo $sql;
+            //echo $sql;
 
             try {
                 $stmt = $db->query($sql);
-                //echo '<p class="suc_msg">ユーザー登録が完了しました。</p>';
-                $result_msg['suc_msg'] = 'ユーザー登録が完了しました。';
-                return $result_msg;
+                suc_msg('ユーザー登録が完了しました。');
             } catch (PDOException $e){
-                echo $e->getMessage();
-                print_r($db->errorInfo());
+                //echo $e->getMessage();
+                //print_r($db->errorInfo());
                 $errinfo = $db->errorInfo();
                 if ($errinfo[1] == '1062') {
-                    //$_SESSION['err_msg'] = '登録できないユーザー名です。';
-                    $result_msg['err_msg'] = '登録できないユーザー名です。';
-                    return $result_msg;
+                    err_msg('登録できないユーザー名です。');
                 } else {
-                    //$_SESSION['err_msg'] = '申し訳ございません。再度お試しください。';
-                    $result_msg['err_msg'] = '申し訳ございません。再度お試しください。';
-                    return $result_msg;
+                    err_msg('申し訳ございません。再度お試しください。');
                 }
             }
         }
@@ -146,70 +149,121 @@ function user_registration($db) {
  * 商品管理ページからのPOSTが行われた場合の処理の振り分け
  * @return array
  */
-function post_manage() {
+function post_manage($db) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($_POST['post_form'] === 'registration'){
-            $result_msg = product_registration();
-            return $result_msg;
+            product_registration($db);
         } elseif ($_POST['post_form'] === 'change_stock') {
-            $result_msg = change_stock();
-            return $result_msg;
+            change_stock();
         }
     }
 }
 
 /**
  * 商品の登録
- * @return array
+ * @param object $db
  */
-function product_registration () {
+function product_registration ($db) {
     $product_name = $_POST['product_name'];
     $price = $_POST['price'];
     $stock_qty = $_POST['stock_qty'];
-    $upload_image = $_POST['upload_image'];
+    $upload_image = $_FILES['upload_image'];
     $public_fig = $_POST['public_fig'];
 
     if ((!isset($product_name)) or ($product_name == "")) {
-        $result_msg['err_msg'] = '商品名が入力されていません';
-        return $result_msg;
+        err_msg('商品名が入力されていません');
+    } elseif (!preg_match("/^[0-9]+$/", $price)) {
+        err_msg('価格を0以上の整数にしてください');
+    } elseif (!preg_match("/^[0-9]+$/", $stock_qty)) {
+        err_msg('在庫数を0以上の整数にしてください');
+    } elseif ($upload_image['size'] == 0) { //ファイルが送信されていない
+        err_msg('ファイルが送信されていません');
+    } elseif (($upload_image['type'] != 'image/jpeg') && ($upload_image['type'] != 'image/png')){   //ファイル形式が異なる
+        err_msg('ファイルの形式が「JPEG」「PNG」でありません');
+    } elseif (!isset($public_fig)) {
+        err_msg('公開フラグが選択されていません');
+    } else {
+        product_registration_sql($db);
+    }
+}
+
+/**
+ * 商品登録のSQL実行
+ * 
+ * @param object $db
+ */
+function product_registration_sql ($db){
+    $product_name = $_POST['product_name'];
+    $price = $_POST['price'];
+    $stock_qty = $_POST['stock_qty'];
+    $upload_image = $_FILES['upload_image'];
+    $public_fig = $_POST['public_fig'];
+
+    $db->beginTransaction();   //トランザクション開始
+
+    //ec_productへのinsert
+    $sql_product = "INSERT INTO " .DB_PRODUCT. " (product_name, price, public_flg, create_date, update_date) 
+        VALUES ('$product_name', '$price', '$public_fig', '".get_date()."', '".get_date()."' )";
+    try {
+        $stmt = $db->query($sql_product);
+    } catch (PDOException $e){
+        $db->rollback();
+        err_msg('商品登録できませんでした。再度お試しください。');
+        return;
     }
 
-    if (!preg_match("/^[0-9]+$/", $price)) {
-        $result_msg['err_msg'] = '価格を0以上の整数にしてください';
-        return $result_msg;
+    //ec_productに登録した商品のproduct_id取得
+    $sql_getid = "SELECT product_id FROM ".DB_PRODUCT." WHERE product_name = '$product_name' LIMIT 1";
+    $stmt = $db->query($sql_getid);
+    $result = $stmt->fetch();
+    $product_id = $result['product_id'];
+
+    //ec_stockへのinsert
+    $sql_stock = "INSERT INTO " .DB_STOCK. " (product_id, stock_qty, create_date, update_date) 
+        VALUES ('$product_id', '$stock_qty', '".get_date()."', '".get_date()."' )";
+    try {
+        $stmt = $db->query($sql_stock);
+    } catch (PDOException $e){
+        $db->rollback();
+        err_msg('在庫数登録できませんでした。再度お試しください。');
+        return;
     }
 
-    if (!preg_match("/^[0-9]+$/", $stock_qty)) {
-        $result_msg['err_msg'] = '在庫数を0以上の整数にしてください';
-        return $result_msg;
+    //ファイル名の決定
+    if ($upload_image['type'] == 'image/jpeg') {
+        $image_name = 'product' . $product_id . '.jpg';
+    } elseif ($upload_image['type'] == 'image/png') {
+        $image_name = 'product' . $product_id . ".png";
     }
 
-    if ($_FILES['upload_image']['size'] == 0) { //ファイルが送信されていない
-        $result_msg['err_msg'] = 'ファイルが送信されていません';
-        return $result_msg;
-    }
-    
-    if (($_FILES['upload_image']['type'] != 'image/jpeg') && ($_FILES['upload_image']['type'] != 'image/png')){   //ファイル形式が異なる
-        $result_msg['err_msg'] = 'ファイルの形式が「JPEG」「PNG」でありません';
-        return $result_msg;
-    }
-
-    if (!isset($public_fig)) {
-        $result_msg['err_msg'] = '公開フラグが入力されていません';
-        return $result_msg;
+    //ec_imageへのinsert
+    $sql_image = "INSERT INTO " .DB_IMAGE. " (product_id, image_name, create_date, update_date) 
+        VALUES ('$product_id', '$image_name', '".get_date()."', '".get_date()."' )";
+    try {
+        $stmt = $db->query($sql_image);
+    } catch (PDOException $e){
+        $db->rollback();
+        err_msg('画像登録できませんでした。再度お試しください。');
+        return;
     }
 
-    $result_msg['suc_msg'] = '商品登録（仮）';
-    return $result_msg;
+    //画像のアップロード
+    $save = '../ec_site/img/' . $image_name;
+
+    if(move_uploaded_file($upload_image['tmp_name'],$save)){
+        $db->commit();  //アップロード成功
+        suc_msg('商品登録完了しました');
+    } else {
+        $db->rollback();    //アップロード失敗なのでロールバック
+        err_msg('画像アップロードに失敗しました');
+    }
 }
 
 /**
  * 商品在庫数の変更
- * @return array
  */
 function change_stock () {
-    $result_msg['suc_msg'] = '在庫数変更（仮）';
-    return $result_msg;
+    suc_msg('在庫数変更（仮）');
 }
 
 /**
