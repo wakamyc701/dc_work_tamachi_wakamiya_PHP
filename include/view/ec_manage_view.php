@@ -38,7 +38,7 @@
 
                 <input type="submit" form="change_stock" value="在庫数変更">
 
-                <table>
+                <table class="product_list">
                     <tr>
                         <th>商品画像</th>
                         <th>商品名</th>
@@ -48,8 +48,21 @@
                         <th>削除</th>
                     </tr>
                     <?php
-                    //foreachループを入れる
-                    //複数の配列のforeachにはarray_map(null)を使う
+                    get_list_manage($db);
+                    //$result = get_list_manage($db);
+                    //var_dump($result);
+                    /*
+                    foreach($result as $row) {
+                        echo '<tr>
+                            <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
+                            <td>' . $row['product_name'] . '</td>
+                            <td>' . $row['price'] . '</td>
+                            <td>' . $row['stock_qty'] . '</td>
+                            <td>' . $row['public_flg'] . '</td>
+                            <td></td>
+                        </tr>';
+                    }
+                    */
                     ?>
                 </table>
 

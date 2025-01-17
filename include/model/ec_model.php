@@ -260,6 +260,35 @@ function product_registration_sql ($db){
 }
 
 /**
+ * 管理画面の商品リスト作成
+ * @param object $db
+ */
+function get_list_manage ($db) {
+    $sql = "SELECT ec_product.product_id, ec_product.product_name, ec_product.price, ec_product.public_flg, ec_image.image_name, ec_stock.stock_qty 
+        FROM " . DB_PRODUCT . " LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) ORDER BY product_id";
+    $stmt = $db->query($sql);
+
+    foreach($stmt as $row) {
+        echo '<tr>
+            <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
+            <td>' . $row['product_name'] . '</td>
+            <td>' . $row['price'] . '</td>
+            <td><input type="text" class="input_value" form="change_stock" name="' . $row['product_id'] . '" value="' .$row['stock_qty'] . '">
+                <input type="submit" form="change_stock" value="在庫数変更"></td>';
+            if ($row['public_flg'] == 0) {
+                echo '<td>' . $row['public_flg'] . '(公開)</td>';
+            } else {
+                echo '<td>' . $row['public_flg'] . '(非公開)</td>';
+            }
+            echo '<td></td>
+        </tr>';
+    }
+}
+
+
+
+
+/**
  * 商品在庫数の変更
  */
 function change_stock () {
