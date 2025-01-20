@@ -125,8 +125,7 @@ function user_registration($db) {
             err_msg('登録できないパスワードです。');
         } else {
             $sql = "INSERT INTO " .DB_USER. " (user_name, user_password, create_date, update_date) 
-                VALUES ('$user_name', '$user_password', '".get_date()."', '".get_date()."' )";
-            //echo $sql;
+            VALUES ('$user_name', '$user_password', '".get_date()."', '".get_date()."' )";
 
             try {
                 $stmt = $db->query($sql);
@@ -153,8 +152,12 @@ function post_manage($db) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($_POST['post_form'] === 'registration'){
             product_registration($db);
-        } elseif ($_POST['post_form'] === 'change_stock') {
-            change_stock();
+        } elseif ($_POST['post_form'] === 'change_stock_qty') {
+            change_stock_qty($db);
+        } elseif ($_POST['post_form'] === 'change_public_flg') {
+            change_public_flg($db);
+        } elseif ($_POST['post_form'] === 'del_product') {
+            del_product($db);
         }
     }
 }
@@ -203,7 +206,7 @@ function product_registration_sql ($db){
 
     //ec_productへのinsert
     $sql_product = "INSERT INTO " .DB_PRODUCT. " (product_name, price, public_flg, create_date, update_date) 
-        VALUES ('$product_name', '$price', '$public_fig', '".get_date()."', '".get_date()."' )";
+    VALUES ('$product_name', '$price', '$public_fig', '".get_date()."', '".get_date()."' )";
     try {
         $stmt = $db->query($sql_product);
     } catch (PDOException $e){
@@ -220,7 +223,7 @@ function product_registration_sql ($db){
 
     //ec_stockへのinsert
     $sql_stock = "INSERT INTO " .DB_STOCK. " (product_id, stock_qty, create_date, update_date) 
-        VALUES ('$product_id', '$stock_qty', '".get_date()."', '".get_date()."' )";
+    VALUES ('$product_id', '$stock_qty', '".get_date()."', '".get_date()."' )";
     try {
         $stmt = $db->query($sql_stock);
     } catch (PDOException $e){
@@ -238,7 +241,7 @@ function product_registration_sql ($db){
 
     //ec_imageへのinsert
     $sql_image = "INSERT INTO " .DB_IMAGE. " (product_id, image_name, create_date, update_date) 
-        VALUES ('$product_id', '$image_name', '".get_date()."', '".get_date()."' )";
+    VALUES ('$product_id', '$image_name', '".get_date()."', '".get_date()."' )";
     try {
         $stmt = $db->query($sql_image);
     } catch (PDOException $e){
@@ -265,39 +268,84 @@ function product_registration_sql ($db){
  */
 function get_list_manage ($db) {
     $sql = "SELECT ec_product.product_id, ec_product.product_name, ec_product.price, ec_product.public_flg, ec_image.image_name, ec_stock.stock_qty 
-        FROM " . DB_PRODUCT . " LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) ORDER BY product_id";
+    FROM " . DB_PRODUCT . " LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) ORDER BY product_id";
     $stmt = $db->query($sql);
 
     foreach($stmt as $row) {
-        echo '<tr>
-            <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
-            <td>' . $row['product_name'] . '</td>
-            <td>' . $row['price'] . '</td>
-            <td><input type="text" class="input_value" form="change_stock" name="' . $row['product_id'] . '" value="' .$row['stock_qty'] . '">
-                <input type="submit" form="change_stock" value="在庫数変更"></td>';
-            if ($row['public_flg'] == 0) {
-                echo '<td>' . $row['public_flg'] . '(公開)</td>';
-            } else {
-                echo '<td>' . $row['public_flg'] . '(非公開)</td>';
-            }
-            echo '<td></td>
-        </tr>';
+        echo '<form method="post">
+            <input type="hidden" name="product_id" value="' .$row['product_id'] . '">
+            <tr class="list_bg' . $row['public_flg'] . '">
+                <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
+                <td>' . $row['product_name'] . '</td>
+                <td>' . $row['price'] . '</td>
+                <td><input type="text" class="input_value" name="stock_qty" value="' .$row['stock_qty'] . '">
+                <button name="post_form" value="change_stock_qty">在庫数変更</button></td>';
+                if ($row['public_flg'] == 1) {
+                    echo '<td><input type="hidden" name="next_flg" value="0">
+                    <button name="post_form" value="change_public_flg">非公開にする</button></td>';
+                } else {
+                    echo '<td><input type="hidden" name="next_flg" value="1">
+                    <button name="post_form" value="change_public_flg">公開にする</button></td>';
+                }
+                echo '<td><button name="post_form" value="del_product">削除する</button></td>
+            </tr>
+        </form>';
     }
 }
 
-
-
-
 /**
  * 商品在庫数の変更
+ * @param object $db
  */
-function change_stock () {
-    suc_msg('在庫数変更（仮）');
+function change_stock_qty ($db) {
+    if (!preg_match("/^[0-9]+$/", $_POST['stock_qty'])) {
+        err_msg('在庫数を0以上の整数にしてください');
+        return;
+    }
+    $sql = "UPDATE " . DB_STOCK . " SET stock_qty = " . $_POST['stock_qty'] . ", update_date = '" . get_date() . "' 
+    WHERE product_id = " . $_POST['product_id'] . "";
+    try {
+        $stmt = $db->query($sql);
+        suc_msg('在庫数を変更しました');
+    } catch (PDOException $e) {
+        err_msg('在庫数を変更できませんでした。再度お試しください。');
+    }
 }
 
 /**
- * 商品管理画面用のSELECT実行
- * 
+ * 公開フラグの変更
  * @param object $db
- * @return array
  */
+function change_public_flg ($db) {
+    $sql = "UPDATE " . DB_PRODUCT . " SET public_flg = " . $_POST['next_flg'] . ", update_date = '" . get_date() . "' 
+    WHERE product_id = " . $_POST['product_id'] . "";
+    try {
+        $stmt = $db->query($sql);
+        suc_msg('公開フラグを変更しました');
+    } catch (PDOException $e) {
+        err_msg('公開フラグを変更できませんでした。再度お試しください。');
+    }
+
+}
+
+/**
+ * 商品の削除
+ * @param object $db
+ */
+function del_product ($db) {
+    $sql_product = "DELETE FROM " . DB_PRODUCT . " WHERE product_id = " . $_POST['product_id'] . "";
+    $sql_image = "DELETE FROM " . DB_IMAGE . " WHERE product_id = " . $_POST['product_id'] . "";
+    $sql_stock = "DELETE FROM " . DB_STOCK . " WHERE product_id = " . $_POST['product_id'] . "";
+
+    $db->beginTransaction();
+    try {
+        $stmt_stock = $db->query($sql_stock);
+        $stmt_image = $db->query($sql_image);
+        $stmt_product = $db->query($sql_product);
+        $db->commit();
+        suc_msg('商品を削除しました');
+    } catch (PDOException $e){
+        $db->rollback();
+        err_msg('商品を削除できませんでした');
+    }
+}

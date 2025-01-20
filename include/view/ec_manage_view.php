@@ -27,16 +27,10 @@
                     <p>価格　　　：<input type="text" name="price"></p>
                     <p>在庫数　　：<input type="text" name="stock_qty"></p>
                     <p>商品画像　：<input type="file" name="upload_image"></p>
-                    <p>公開フラグ：<input type="radio" id="choice0" name="public_fig" value="0" /><label for="choice0">公開</label>
-                        <input type="radio" id="choice1" name="public_fig" value="1" /><label for="choice1">非公開</label></p>
+                    <p>公開フラグ：<input type="radio" id="choice1" name="public_fig" value="1" /><label for="choice1">公開</label>
+                    <input type="radio" id="choice0" name="public_fig" value="0" /><label for="choice0">非公開</label></p>
                     <input type="submit" value="商品を登録">
                 </form>
-
-                <form method="post" id="change_stock">
-                    <input type="hidden" name="post_form" value="change_stock">
-                </form>
-
-                <input type="submit" form="change_stock" value="在庫数変更">
 
                 <table class="product_list">
                     <tr>
@@ -49,20 +43,6 @@
                     </tr>
                     <?php
                     get_list_manage($db);
-                    //$result = get_list_manage($db);
-                    //var_dump($result);
-                    /*
-                    foreach($result as $row) {
-                        echo '<tr>
-                            <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
-                            <td>' . $row['product_name'] . '</td>
-                            <td>' . $row['price'] . '</td>
-                            <td>' . $row['stock_qty'] . '</td>
-                            <td>' . $row['public_flg'] . '</td>
-                            <td></td>
-                        </tr>';
-                    }
-                    */
                     ?>
                 </table>
 
