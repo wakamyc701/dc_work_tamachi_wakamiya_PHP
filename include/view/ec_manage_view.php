@@ -26,10 +26,10 @@
                     <p>商品名　　：<input type="text" name="product_name"></p>
                     <p>価格　　　：<input type="text" name="price"></p>
                     <p>在庫数　　：<input type="text" name="stock_qty"></p>
-                    <p>商品画像　：<input type="file" name="upload_image"></p>
+                    <p>商品画像　：<input class="file_btn" type="file" name="upload_image"></p>
                     <p>公開フラグ：<input type="radio" id="choice1" name="public_fig" value="1" /><label for="choice1">公開</label>
                     <input type="radio" id="choice0" name="public_fig" value="0" /><label for="choice0">非公開</label></p>
-                    <input type="submit" value="商品を登録">
+                    <button>商品を登録</button>
                 </form>
 
                 <table class="product_list">

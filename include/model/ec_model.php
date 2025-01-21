@@ -49,6 +49,7 @@ function get_date(){
 
 /**
  * エラーメッセージを格納
+ * 
  * @param string
  */
 function err_msg ($msg) {
@@ -58,6 +59,7 @@ function err_msg ($msg) {
 
 /**
  * 成功メッセージを格納
+ * 
  * @param string
  */
 function suc_msg ($msg) {
@@ -71,6 +73,20 @@ function suc_msg ($msg) {
 function clr_msg () {
     $_SESSION['err_msg'] = '';
     $_SESSION['suc_msg'] = '';
+}
+
+/**
+ * 値が0以上の整数であることの確認
+ * 
+ * @param int
+ * @return int
+ */
+function check_int_0($num) {
+    if (preg_match("/^[0-9]+$/", $num)) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 /**
@@ -146,6 +162,8 @@ function user_registration($db) {
 
 /**
  * 商品管理ページからのPOSTが行われた場合の処理の振り分け
+ * manage.phpにて使用
+ * 
  * @return array
  */
 function post_manage($db) {
@@ -164,6 +182,8 @@ function post_manage($db) {
 
 /**
  * 商品の登録
+ * manage.phpにて使用
+ * 
  * @param object $db
  */
 function product_registration ($db) {
@@ -175,12 +195,12 @@ function product_registration ($db) {
 
     if ((!isset($product_name)) or ($product_name == "")) {
         err_msg('商品名が入力されていません');
-    } elseif (!preg_match("/^[0-9]+$/", $price)) {
+    } elseif (!check_int_0($price)) {
         err_msg('価格を0以上の整数にしてください');
-    } elseif (!preg_match("/^[0-9]+$/", $stock_qty)) {
+    } elseif (!check_int_0($stock_qty)) {
         err_msg('在庫数を0以上の整数にしてください');
     } elseif ($upload_image['size'] == 0) { //ファイルが送信されていない
-        err_msg('ファイルが送信されていません');
+        err_msg('ファイルが選択されていません');
     } elseif (($upload_image['type'] != 'image/jpeg') && ($upload_image['type'] != 'image/png')){   //ファイル形式が異なる
         err_msg('ファイルの形式が「JPEG」「PNG」でありません');
     } elseif (!isset($public_fig)) {
@@ -191,7 +211,8 @@ function product_registration ($db) {
 }
 
 /**
- * 商品登録のSQL実行
+ * 商品登録のSQL実行部分
+ * manage.phpにて使用
  * 
  * @param object $db
  */
@@ -264,6 +285,8 @@ function product_registration_sql ($db){
 
 /**
  * 管理画面の商品リスト作成
+ * manage.phpにて使用
+ * 
  * @param object $db
  */
 function get_list_manage ($db) {
@@ -295,10 +318,12 @@ function get_list_manage ($db) {
 
 /**
  * 商品在庫数の変更
+ * manage.phpにて使用
+ * 
  * @param object $db
  */
 function change_stock_qty ($db) {
-    if (!preg_match("/^[0-9]+$/", $_POST['stock_qty'])) {
+    if (!check_int_0($_POST['stock_qty'])) {
         err_msg('在庫数を0以上の整数にしてください');
         return;
     }
@@ -314,6 +339,8 @@ function change_stock_qty ($db) {
 
 /**
  * 公開フラグの変更
+ * manage.phpにて使用
+ * 
  * @param object $db
  */
 function change_public_flg ($db) {
@@ -330,6 +357,8 @@ function change_public_flg ($db) {
 
 /**
  * 商品の削除
+ * manage.phpにて使用
+ * 
  * @param object $db
  */
 function del_product ($db) {
@@ -347,5 +376,35 @@ function del_product ($db) {
     } catch (PDOException $e){
         $db->rollback();
         err_msg('商品を削除できませんでした');
+    }
+}
+
+/**
+ * 商品一覧画面の商品リスト作成
+ * catalog.phpにて使用
+ * 
+ * @param object $db
+ */
+function get_list_catalog($db) {
+    $sql = "SELECT ec_product.product_id, ec_product.product_name, ec_product.price, ec_product.public_flg, ec_image.image_name, ec_stock.stock_qty 
+    FROM " . DB_PRODUCT . " LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE public_flg = 1 ORDER BY product_id";
+    //echo('<p>'.$sql.'</p>');
+    $stmt = $db->query($sql);
+
+    echo '<form method="post"><div class="catalog_container">';
+    foreach($stmt as $row) {
+        echo '<div class="catalog_element">
+            <a href="../ec_site/img/' . $row["image_name"] . '" target="_blank"><img src="../ec_site/img/' . $row["image_name"] . '"></a>
+            <h3>' . $row["product_name"] . '</h3>
+            <p>' . $row["price"] . '円</p>
+            <button name="select_product_id" value="' . $row['product_id'] . '">カートに入れる</button>
+            </div>';
+    }
+    echo '</div></form>';
+}
+
+function post_catalog ($db) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        suc_msg($_POST['select_product_id']);
     }
 }

@@ -17,6 +17,8 @@ try{
     exit();
 }
 
+post_catalog($db);
+
 $links = [
     "ログアウト" => "logout.php"
 ];

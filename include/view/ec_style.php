@@ -33,6 +33,11 @@
         margin: 0;
     }
 
+    h3 {
+        margin: 0;
+        font-size: 18px;
+    }
+
     a {
         color: inherit;
     }
@@ -47,7 +52,7 @@
     }
 
     .list_bg0 {
-        background-color: #bbbbbb;
+        background-color: #9ba88d;
     }
 
     .list_bg1 {
@@ -114,7 +119,7 @@
 
     .header-lower {
         background-color: #711D1D;
-        margin: 1px 0 0 0;
+        margin: 0;
         padding-left: 20px;
         line-height: 29px;
         text-align: left;
@@ -159,6 +164,26 @@
         font-weight: bold;
     }
 
+    button {
+        background-color: #d3cbc6;
+        border: 0;
+        border-radius: 3px;
+        box-shadow: 1px 1px #281a14;
+        font-size: 14px;
+    }
+
+    .file_btn {
+        line-height: 24px;
+    }
+
+    .file_btn::file-selector-button {
+        background-color: #d3cbc6;
+        border: 0;
+        border-radius: 3px;
+        box-shadow: 1px 1px #281a14;
+        font-size: 14px;
+    }
+
     .form_btn {
         margin-top: 10px;
         margin-bottom: 24px;
@@ -176,5 +201,37 @@
     .input_value {
         width: 60px;
     }
+
+    .catalog_container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 20px;
+        margin-bottom: 30px;
+    }
+
+    .catalog_element {
+        width: 250px;
+        text-align: center;
+        margin: 2px;
+        padding: 2px;
+        border: solid 2px #adadad;
+    }
     
+    .catalog_element img {
+        width: 240px;
+        height: 240px;
+        object-fit: contain;
+    }
+
+    .catalog_element p {
+        margin: 4px;
+    }
+
+    .catalog_element button {
+        background-color: #9845cc;
+        box-shadow: 2px 2px #261133;
+        color: #e7e7eb;
+        margin-bottom: 8px;
+    }
 </style>
