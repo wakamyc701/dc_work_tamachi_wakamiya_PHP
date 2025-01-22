@@ -391,20 +391,49 @@ function get_list_catalog($db) {
     //echo('<p>'.$sql.'</p>');
     $stmt = $db->query($sql);
 
-    echo '<form method="post"><div class="catalog_container">';
+    echo '<div class="catalog_container">';
     foreach($stmt as $row) {
         echo '<div class="catalog_element">
             <a href="../ec_site/img/' . $row["image_name"] . '" target="_blank"><img src="../ec_site/img/' . $row["image_name"] . '"></a>
             <h3>' . $row["product_name"] . '</h3>
-            <p>' . $row["price"] . '円</p>
-            <button name="select_product_id" value="' . $row['product_id'] . '">カートに入れる</button>
-            </div>';
+            <p>' . $row["price"] . '円</p>';
+            if ($row["stock_qty"] == 0) {
+                echo '<p class="soldout_text">売り切れ</p>';
+            } else {
+                echo '<form method="post">
+                    <input type="hidden" name="select_product_name" value="' .$row['product_name'] . '">
+                    <button name="select_product_id" value="' . $row['product_id'] . '">カートに入れる</button>
+                </form>';
+            }
+            echo '</div>';
     }
-    echo '</div></form>';
+    echo '</div>';
 }
 
+/**
+ * 商品一覧画面でカートに入れるボタンが押された場合の挙動
+ * catalog.phpにて使用
+ * 
+ * @param object $db
+ */
 function post_catalog ($db) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        suc_msg($_POST['select_product_id']);
+        //セッションにcart_idが無ければDBとセッションにつくる
+        if (empty($_SESSION['cart_id'])) {
+            $sql_cart = "INSERT INTO " .DB_CART. " (user_id, create_date, update_date) 
+            VALUES ('" . $_SESSION['user_id'] . "', '" . get_date() . "', '" . get_date() . "' )";
+            suc_msg($sql_cart);
+            try {
+                $stmt = $db->query($sql_cart);
+            } catch (PDOException $e) {
+                err_msg('カートに商品を追加できませんでした。再度お試しください。');
+                return;
+            }
+            //↓書き換え中。今作ったカートのID取ってくる方法は無いのか？？
+            $sql_getid = "SELECT cart_id FROM ".DB_CART." WHERE product_name = '$product_name' LIMIT 1";
+
+        }
+        //ec_orderに、対応する商品のレコードを作る。既にある場合はproduct_qtyを増やす
+        //suc_msg($_POST['select_product_id'] . $_POST['select_product_name'] . ' をカートに追加しました');
     }
 }

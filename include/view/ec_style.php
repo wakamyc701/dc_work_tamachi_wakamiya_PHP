@@ -211,7 +211,7 @@
     }
 
     .catalog_element {
-        width: 250px;
+        width: 254px;
         text-align: center;
         margin: 2px;
         padding: 2px;
@@ -233,5 +233,10 @@
         box-shadow: 2px 2px #261133;
         color: #e7e7eb;
         margin-bottom: 8px;
+    }
+
+    .soldout_text {
+        color: #c53d43;
+        font-weight: bold;
     }
 </style>
