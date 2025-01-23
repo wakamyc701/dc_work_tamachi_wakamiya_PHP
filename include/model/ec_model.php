@@ -146,11 +146,13 @@ function user_registration($db) {
             try {
                 $stmt = $db->query($sql);
                 suc_msg('ユーザー登録が完了しました。');
+                header('Location: ./registration.php');
+                exit();
             } catch (PDOException $e){
                 //echo $e->getMessage();
                 //print_r($db->errorInfo());
                 $errinfo = $db->errorInfo();
-                if ($errinfo[1] == '1062') {
+                if ($errinfo[1] == '1062') {    //既に存在するユーザー名と重複
                     err_msg('登録できないユーザー名です。');
                 } else {
                     err_msg('申し訳ございません。再度お試しください。');
@@ -237,10 +239,10 @@ function product_registration_sql ($db){
     }
 
     //ec_productに登録した商品のproduct_id取得
-    $sql_getid = "SELECT product_id FROM ".DB_PRODUCT." WHERE product_name = '$product_name' LIMIT 1";
-    $stmt = $db->query($sql_getid);
+    $sql_getid = "SELECT LAST_INSERT_ID()";
+    $stmt =  $db->query($sql_getid);
     $result = $stmt->fetch();
-    $product_id = $result['product_id'];
+    $product_id = $result['LAST_INSERT_ID()'];
 
     //ec_stockへのinsert
     $sql_stock = "INSERT INTO " .DB_STOCK. " (product_id, stock_qty, create_date, update_date) 
@@ -277,6 +279,8 @@ function product_registration_sql ($db){
     if(move_uploaded_file($upload_image['tmp_name'],$save)){
         $db->commit();  //アップロード成功
         suc_msg('商品登録完了しました');
+        header('Location: ./manage.php');
+        exit();
     } else {
         $db->rollback();    //アップロード失敗なのでロールバック
         err_msg('画像アップロードに失敗しました');
@@ -329,10 +333,12 @@ function change_stock_qty ($db) {
     }
     $sql = "UPDATE " . DB_STOCK . " SET stock_qty = " . $_POST['stock_qty'] . ", update_date = '" . get_date() . "' 
     WHERE product_id = " . $_POST['product_id'] . "";
-    try {
-        $stmt = $db->query($sql);
+    $stmt = $db->query($sql);
+    if ($stmt) {
         suc_msg('在庫数を変更しました');
-    } catch (PDOException $e) {
+        header('Location: ./manage.php');
+        exit();
+    } else {
         err_msg('在庫数を変更できませんでした。再度お試しください。');
     }
 }
@@ -346,13 +352,14 @@ function change_stock_qty ($db) {
 function change_public_flg ($db) {
     $sql = "UPDATE " . DB_PRODUCT . " SET public_flg = " . $_POST['next_flg'] . ", update_date = '" . get_date() . "' 
     WHERE product_id = " . $_POST['product_id'] . "";
-    try {
-        $stmt = $db->query($sql);
+    $stmt = $db->query($sql);
+    if ($stmt) {
         suc_msg('公開フラグを変更しました');
-    } catch (PDOException $e) {
+        header('Location: ./manage.php');
+        exit();
+    } else {
         err_msg('公開フラグを変更できませんでした。再度お試しください。');
     }
-
 }
 
 /**
@@ -373,6 +380,8 @@ function del_product ($db) {
         $stmt_product = $db->query($sql_product);
         $db->commit();
         suc_msg('商品を削除しました');
+        header('Location: ./manage.php');
+        exit();
     } catch (PDOException $e){
         $db->rollback();
         err_msg('商品を削除できませんでした');
@@ -388,7 +397,6 @@ function del_product ($db) {
 function get_list_catalog($db) {
     $sql = "SELECT ec_product.product_id, ec_product.product_name, ec_product.price, ec_product.public_flg, ec_image.image_name, ec_stock.stock_qty 
     FROM " . DB_PRODUCT . " LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE public_flg = 1 ORDER BY product_id";
-    //echo('<p>'.$sql.'</p>');
     $stmt = $db->query($sql);
 
     echo '<div class="catalog_container">';
@@ -405,7 +413,7 @@ function get_list_catalog($db) {
                     <button name="select_product_id" value="' . $row['product_id'] . '">カートに入れる</button>
                 </form>';
             }
-            echo '</div>';
+        echo '</div>';
     }
     echo '</div>';
 }
@@ -418,22 +426,76 @@ function get_list_catalog($db) {
  */
 function post_catalog ($db) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $select_product_id = $_POST['select_product_id'];
+        $select_product_name = $_POST['select_product_name'];
+
         //セッションにcart_idが無ければDBとセッションにつくる
         if (empty($_SESSION['cart_id'])) {
             $sql_cart = "INSERT INTO " .DB_CART. " (user_id, create_date, update_date) 
             VALUES ('" . $_SESSION['user_id'] . "', '" . get_date() . "', '" . get_date() . "' )";
             suc_msg($sql_cart);
-            try {
-                $stmt = $db->query($sql_cart);
-            } catch (PDOException $e) {
+            $stmt = $db->query($sql_cart);
+            if (!$stmt) {
                 err_msg('カートに商品を追加できませんでした。再度お試しください。');
                 return;
             }
-            //↓書き換え中。今作ったカートのID取ってくる方法は無いのか？？
-            $sql_getid = "SELECT cart_id FROM ".DB_CART." WHERE product_name = '$product_name' LIMIT 1";
-
+            $sql_getid = "SELECT LAST_INSERT_ID()";
+            $stmt =  $db->query($sql_getid);
+            $result = $stmt->fetch();
+            $cart_id = $result['LAST_INSERT_ID()'];
+            $_SESSION['cart_id'] = $cart_id;
+        } else {
+            $cart_id = $_SESSION['cart_id'];
         }
-        //ec_orderに、対応する商品のレコードを作る。既にある場合はproduct_qtyを増やす
-        //suc_msg($_POST['select_product_id'] . $_POST['select_product_name'] . ' をカートに追加しました');
+
+        $db->beginTransaction();
+
+        try {
+            //ec_orderに、対応する商品のレコードを作る。既にある場合はproduct_qtyを増やす
+            $eql_order_select = "SELECT order_id FROM " . DB_ORDER . " WHERE cart_id = " . $cart_id . " AND product_id = " . $select_product_id . "";
+            $stmt = $db->query($eql_order_select);
+            $result = $stmt->fetch();
+
+            if (!$result) {
+                $sql_order_insert = "INSERT INTO " . DB_ORDER . " (cart_id, product_id, product_qty, create_date, update_date) 
+                VALUES (" . $cart_id . ", " . $select_product_id . ", 1, '" . get_date() . "', '" . get_date() . "')";
+                $stmt = $db->query($sql_order_insert);
+            } else {
+                //レコードが存在するので、商品数を1増やす
+                $sql_order_update = "UPDATE " . DB_ORDER . " SET product_qty = product_qty + 1, update_date =  '" . get_date() . "' 
+                WHERE order_id = " . $result['order_id'] . "";
+                $stmt = $db->query($sql_order_update);
+            }
+
+            //在庫を1減らす
+            $sql_stock_decrease = "UPDATE " . DB_STOCK . " SET stock_qty = stock_qty - 1 , update_date =  '" . get_date() . "' 
+            WHERE product_id = '" . $select_product_id . "'";
+            $stmt = $db->query($sql_stock_decrease);
+
+            $db->commit();
+            suc_msg($select_product_id . $select_product_name . ' をカートに追加しました');
+            header('Location: ./catalog.php');
+            exit();
+        } catch (PDOException $e){
+            $db->rollback();
+            err_msg('カートに商品を追加できませんでした。再度お試しください。');
+        }
+    }
+}
+
+/**
+ * ショッピングカート画面の商品リスト作成
+ * cart.phpにて使用
+ * 
+ * @param object $db
+ */
+function get_list_cart($db) {
+    $cart_id = $_SESSION['cart_id'];
+
+    $sql = "SELECT ec_cart.cart_id, ec_order.order_id, ec_order.product_id, ec_order.product_qty, ec_product.product_name, ec_product.price, ec_image.image_name, ec_stock.stock_qty 
+    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY product_id";
+    $stmt = $db->query($sql);
+    foreach ($stmt as $row){
+        //リスト作る
     }
 }

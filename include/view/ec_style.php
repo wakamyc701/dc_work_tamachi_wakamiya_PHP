@@ -68,11 +68,11 @@
     }
 
     .product_list th:nth-child(2) {
-        width: 150px;
+        width: 180px;
     }
 
     .product_list th:nth-child(3) {
-        width: 100px;
+        width: 70px;
     }
 
     .product_list th:nth-child(4) {
@@ -99,7 +99,7 @@
         margin: auto 0;
         line-height: 40px;
         padding: 10px 20px;
-        column-gap: 10px;
+        column-gap: 20px;
     }
 
     .header-upper li {
@@ -173,7 +173,7 @@
     }
 
     .file_btn {
-        line-height: 24px;
+        line-height: 26px;
     }
 
     .file_btn::file-selector-button {

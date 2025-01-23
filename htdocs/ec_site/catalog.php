@@ -1,11 +1,19 @@
 <?php
 session_start();
 
+if (empty($_SESSION['user_id'])) {
+    header('Location: index.php');
+    exit;
+}
+
 require_once '../../include/config/const.php';
 
 require_once '../../include/model/ec_model.php';
 
-clr_msg();
+if ($_SESSION['page_now'] != 'catalog') {
+    clr_msg();
+    $_SESSION['page_now'] = 'catalog';
+}
 
 try{
     $db = connect_db();
@@ -20,6 +28,7 @@ try{
 post_catalog($db);
 
 $links = [
+    "カート" => "cart.php",
     "ログアウト" => "logout.php"
 ];
 //$links = [];    //ヘッダ内リンクが無い場合

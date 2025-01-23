@@ -10,7 +10,10 @@ require_once '../../include/config/const.php';
 
 require_once '../../include/model/ec_model.php';
 
-clr_msg();
+if ($_SESSION['page_now'] != 'registration') {
+    clr_msg();
+    $_SESSION['page_now'] = 'registration';
+}
 
 try{
     $db = connect_db();
