@@ -406,7 +406,7 @@ function get_list_catalog($db) {
             <h3>' . $row["product_name"] . '</h3>
             <p>' . $row["price"] . '円</p>';
             if ($row["stock_qty"] == 0) {
-                echo '<p class="soldout_text">売り切れ</p>';
+                echo '<p class="red_text">売り切れ</p>';
             } else {
                 echo '<form method="post">
                     <input type="hidden" name="select_product_name" value="' .$row['product_name'] . '">
@@ -491,11 +491,40 @@ function post_catalog ($db) {
  */
 function get_list_cart($db) {
     $cart_id = $_SESSION['cart_id'];
+    if (empty($cart_id)) {  //カートが未生成
+        echo '<p class="red_text">カートに商品が入っていません。</p>';
+        return;        
+    }
 
     $sql = "SELECT ec_cart.cart_id, ec_order.order_id, ec_order.product_id, ec_order.product_qty, ec_product.product_name, ec_product.price, ec_image.image_name, ec_stock.stock_qty 
     FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY product_id";
     $stmt = $db->query($sql);
+
+    $price_sum = 0;
+    echo '<table class="cart_list">';
     foreach ($stmt as $row){
-        //リスト作る
+        if (!$row['order_id']) {    //カートは有るが商品が空
+            echo '<p class="red_text">カートに商品が入っていません。</p>';
+            return;        
+        }
+        $stock_sum = $row['product_qty'] + $row['stock_qty'];
+        echo '<form method="post">
+            <input type="hidden" name="order_id" value="' .$row['order_id'] . '">
+            <tr>
+                <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
+                <td>' . $row['product_name'] . '</td>
+                <td>価格：' . $row['price'] . '円</td>
+                <td><p class="small_text red_text">' . $stock_sum . '点まで注文できます</p>
+                注文数<input type="text" class="input_value" name="product_qty" value="' .$row['product_qty'] . '">
+                <button name="post_form" value="change_product_qty">注文数変更</button></td>
+                <td><button name="post_form" value="del_product">カートから削除</button></td>
+            </tr>
+        </form>';
+        for ($i = 0; $i < $row['product_qty']; $i++) {
+            $price_sum += $row['price'];
+        }
     }
+    echo '<table>';
+    echo $price_sum . '円';
 }
+

@@ -60,7 +60,7 @@
     }
 
     .product_list th, td {
-        border: 1px solid #555555;
+        border: 1px solid #9ba88d;
     }
 
     .product_list th:nth-child(1) {
@@ -235,8 +235,49 @@
         margin-bottom: 8px;
     }
 
-    .soldout_text {
+    .red_text {
         color: #c53d43;
         font-weight: bold;
     }
+
+    .small_text {
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .cart_list {
+        margin: 30px auto;
+        border: 1px solid #000000;
+    }
+
+    .cart_list td {
+        border: 1px solid #9ba88d;
+    }
+
+    .cart_list td:nth-child(1) {
+        width: 140px;
+    }
+
+    .cart_list td:nth-child(2) {
+        width: 200px;
+    }
+
+    .cart_list td:nth-child(3) {
+        width: 126px;
+    }
+
+    .cart_list td:nth-child(4) {
+        width: 180px;
+    }
+
+    .cart_list td:nth-child(5) {
+        width: 120px;
+    }
+
+    .cart_list img {
+        max-width: 120px;
+        margin: 10px;
+        object-fit: contain;
+    }
+
 </style>
