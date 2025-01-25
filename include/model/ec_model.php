@@ -525,6 +525,8 @@ function get_list_cart($db) {
         }
     }
     echo '<table>';
-    echo $price_sum . '円';
+    echo '<form method="post"><p class="confirmation">小計：　' . $price_sum . '円
+        <button class="form_btn" name="post_form" value="confirmation">購入する</button>
+    </p></button>';
 }
 

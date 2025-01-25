@@ -93,7 +93,7 @@
         object-fit: contain;
     }
 
-    .header-upper {
+    .header_upper {
         background-color: #4F2469;
         display: flex;
         margin: auto 0;
@@ -102,22 +102,22 @@
         column-gap: 20px;
     }
 
-    .header-upper li {
+    .header_upper a {
+        text-decoration: none;
+    }
+
+    .header_upper li {
         font-size: 18px;
         list-style: none;
         margin: auto 0;
         text-decoration: none;
     }
 
-    .header-upper li:nth-of-type(1){
+    .header_upper li:nth-of-type(1){
         margin-right: auto;
     }
 
-    .header-upper a {
-        text-decoration: none;
-    }
-
-    .header-lower {
+    .header_lower {
         background-color: #711D1D;
         margin: 0;
         padding-left: 20px;
@@ -128,6 +128,12 @@
     .title {
         margin-top: 20px;
         margin-bottom: 20px;
+    }
+
+    .wrapper_index {
+        width: 720px;
+        display: block;
+        margin: 0 auto;
     }
 
     .wrapper_main {
@@ -185,8 +191,11 @@
     }
 
     .form_btn {
+        /*
         margin-top: 10px;
         margin-bottom: 24px;
+        */
+        margin: 10px 10px 16px 10px;
         width: 180px;
         height: 30px;
         border: 0;
@@ -196,6 +205,7 @@
         color: #e7e7eb;
         font-size: 16px;
         font-weight: bold;
+        vertical-align: middle;
     }
 
     .input_value {
@@ -263,21 +273,29 @@
     }
 
     .cart_list td:nth-child(3) {
-        width: 126px;
+        width: 120px;
     }
 
     .cart_list td:nth-child(4) {
-        width: 180px;
+        width: 176px;
     }
 
     .cart_list td:nth-child(5) {
-        width: 120px;
+        width: 130px;
     }
 
     .cart_list img {
         max-width: 120px;
         margin: 10px;
         object-fit: contain;
+    }
+
+    .confirmation {
+        margin: 0;
+        text-align: right;
+        color: #4F2469;
+        font-size: 20px;
+        font-weight: bold;
     }
 
 </style>

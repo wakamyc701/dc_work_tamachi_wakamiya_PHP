@@ -1,5 +1,5 @@
 <header>
-    <ul class="header-upper">
+    <ul class="header_upper">
         <li><h1>わぁ！菓子屋さん本舗</h1></li>
         <?php
         foreach ($links as $link_title => $link_url){
@@ -9,7 +9,7 @@
     </ul>
     <?php
     if (!empty($_SESSION['user_name'])) {
-        echo '<p class="header-lower">' . $_SESSION['user_name'] . 'さん、ようこそ！</p>';
+        echo '<p class="header_lower">' . $_SESSION['user_name'] . 'さん、ようこそ！</p>';
     }
     ?>
 </header>
