@@ -166,7 +166,7 @@ function user_registration($db) {
  * 商品管理ページからのPOSTが行われた場合の処理の振り分け
  * manage.phpにて使用
  * 
- * @return array
+ * @param object $db
  */
 function post_manage($db) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -294,7 +294,7 @@ function product_registration_sql ($db){
  * @param object $db
  */
 function get_list_manage ($db) {
-    $sql = "SELECT ec_product.product_id, ec_product.product_name, ec_product.price, ec_product.public_flg, ec_image.image_name, ec_stock.stock_qty 
+    $sql = "SELECT " . DB_PRODUCT . ".product_id, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_PRODUCT . ".public_flg, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
     FROM " . DB_PRODUCT . " LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) ORDER BY product_id";
     $stmt = $db->query($sql);
 
@@ -395,7 +395,7 @@ function del_product ($db) {
  * @param object $db
  */
 function get_list_catalog($db) {
-    $sql = "SELECT ec_product.product_id, ec_product.product_name, ec_product.price, ec_product.public_flg, ec_image.image_name, ec_stock.stock_qty 
+    $sql = "SELECT " . DB_PRODUCT . ".product_id, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_PRODUCT . ".public_flg, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
     FROM " . DB_PRODUCT . " LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE public_flg = 1 ORDER BY product_id";
     $stmt = $db->query($sql);
 
@@ -467,13 +467,15 @@ function post_catalog ($db) {
                 $stmt = $db->query($sql_order_update);
             }
 
+            /*
             //在庫を1減らす
             $sql_stock_decrease = "UPDATE " . DB_STOCK . " SET stock_qty = stock_qty - 1 , update_date =  '" . get_date() . "' 
             WHERE product_id = '" . $select_product_id . "'";
             $stmt = $db->query($sql_stock_decrease);
+            */
 
             $db->commit();
-            suc_msg($select_product_id . $select_product_name . ' をカートに追加しました');
+            suc_msg($select_product_name . ' をカートに追加しました');
             header('Location: ./catalog.php');
             exit();
         } catch (PDOException $e){
@@ -496,7 +498,7 @@ function get_list_cart($db) {
         return;        
     }
 
-    $sql = "SELECT ec_cart.cart_id, ec_order.order_id, ec_order.product_id, ec_order.product_qty, ec_product.product_name, ec_product.price, ec_image.image_name, ec_stock.stock_qty 
+    $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
     FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY product_id";
     $stmt = $db->query($sql);
 
@@ -507,17 +509,17 @@ function get_list_cart($db) {
             echo '<p class="red_text">カートに商品が入っていません。</p>';
             return;        
         }
-        $stock_sum = $row['product_qty'] + $row['stock_qty'];
         echo '<form method="post">
             <input type="hidden" name="order_id" value="' .$row['order_id'] . '">
+            <input type="hidden" name="product_name" value="' .$row['product_name'] . '">
             <tr>
                 <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
                 <td>' . $row['product_name'] . '</td>
                 <td>価格：' . $row['price'] . '円</td>
-                <td><p class="small_text red_text">' . $stock_sum . '点まで注文できます</p>
+                <td><p class="small_text red_text">' . $row['stock_qty'] . '点まで注文できます</p>
                 注文数<input type="text" class="input_value" name="product_qty" value="' .$row['product_qty'] . '">
                 <button name="post_form" value="change_product_qty">注文数変更</button></td>
-                <td><button name="post_form" value="del_product">カートから削除</button></td>
+                <td><button name="post_form" value="del_order">カートから削除</button></td>
             </tr>
         </form>';
         for ($i = 0; $i < $row['product_qty']; $i++) {
@@ -525,8 +527,76 @@ function get_list_cart($db) {
         }
     }
     echo '<table>';
-    echo '<form method="post"><p class="confirmation">小計：　' . $price_sum . '円
-        <button class="form_btn" name="post_form" value="confirmation">購入する</button>
+    echo '<form method="post"><p class="purchase">小計：　' . $price_sum . '円
+        <button class="form_btn" name="post_form" value="confirm_order">購入する</button>
     </p></button>';
 }
 
+/**
+ * カート画面からのPOSTが行われた場合の処理の振り分け
+ * cart.phpにて使用
+ * 
+ * @param object $db
+ */
+function post_cart($db) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($_POST['post_form'] === 'change_product_qty'){
+            change_product_qty($db);
+        } elseif ($_POST['post_form'] === 'del_order') {
+            del_order($db);
+        } elseif ($_POST['post_form'] === 'confirm_order') {
+            confirm_order($db);
+        }
+    }
+}
+
+/**
+ * 注文数の変更
+ * cart.phpにて使用
+ * 
+ * @param object $db
+ */
+function change_product_qty($db) {
+    $select_order_id = $_POST['order_id'];
+    $select_product_name = $_POST['product_name'];
+    $select_product_qty = $_POST['product_qty'];
+
+    if ((!check_int_0($select_product_qty)) or ($select_product_qty == 0)) {
+        err_msg('注文数を1以上の整数にしてください');
+        return;
+    }
+
+    $sql_order_update = "UPDATE " . DB_ORDER . " SET product_qty = " . $select_product_qty . ", update_date =  '" . get_date() . "' 
+    WHERE order_id = " . $select_order_id . "";
+    $stmt = $db->query($sql_order_update);
+
+    suc_msg($select_product_name . ' の注文数を変更しました');
+}
+
+/**
+ * 注文商品の削除
+ * cart.phpにて使用
+ * 
+ * @param object $db
+ */
+
+function del_order($db) {
+    $select_order_id = $_POST['order_id'];
+    $select_product_name = $_POST['product_name'];
+
+    $sql_del_order = "DELETE FROM " . DB_ORDER . " WHERE order_id = " . $select_order_id . "";
+    $stmt = $db->query($sql_del_order);
+
+    suc_msg($select_product_name . ' の注文を削除しました');
+}
+
+/**
+ * 注文の確定・購入
+ * cart.phpにて使用
+ * 
+ * @param object $db
+ */
+function confirm_order($db) {
+    //在庫数から注文数を引く。不足があったらロールバックとエラーメッセージ。これを商品ごとに。
+    suc_msg('注文確定');
+}

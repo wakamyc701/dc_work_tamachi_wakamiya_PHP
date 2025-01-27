@@ -23,7 +23,7 @@ try{
     exit();
 }
 
-//post_cart($db);
+post_cart($db);
 
 $links = [
     "商品一覧" => "catalog.php",

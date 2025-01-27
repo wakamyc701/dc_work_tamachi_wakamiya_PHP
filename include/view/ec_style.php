@@ -290,7 +290,7 @@
         object-fit: contain;
     }
 
-    .confirmation {
+    .purchase {
         margin: 0;
         text-align: right;
         color: #4F2469;
