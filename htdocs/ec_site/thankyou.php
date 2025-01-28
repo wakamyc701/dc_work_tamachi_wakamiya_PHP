@@ -10,9 +10,9 @@ require_once '../../include/config/const.php';
 
 require_once '../../include/model/ec_model.php';
 
-if ($_SESSION['page_now'] != 'cart') {
+if ($_SESSION['page_now'] != 'thankyou') {
     clr_msg();
-    $_SESSION['page_now'] = 'cart';
+    $_SESSION['page_now'] = 'thankyou';
 }
 
 try{
@@ -23,8 +23,6 @@ try{
     exit();
 }
 
-post_cart($db);
-
 $links = [
     "商品一覧" => "catalog.php",
     "購入履歴" => "history.php",
@@ -32,5 +30,5 @@ $links = [
 ];
 //$links = [];    //ヘッダ内リンクが無い場合
 
-include ('../../include/view/ec_cart_view.php');
+include ('../../include/view/ec_thankyou_view.php');
 

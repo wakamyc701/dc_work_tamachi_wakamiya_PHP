@@ -15,6 +15,11 @@ if ($_SESSION['page_now'] != 'catalog') {
     $_SESSION['page_now'] = 'catalog';
 }
 
+if ($_SESSION['purchased']) {   //購入完了後に遷移した場合はカートを破棄
+    unset($_SESSION['cart_id']);
+    unset($_SESSION['purchased']);
+}
+
 try{
     $db = connect_db();
     $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
@@ -29,6 +34,7 @@ post_catalog($db);
 
 $links = [
     "カート" => "cart.php",
+    "購入履歴" => "history.php",
     "ログアウト" => "logout.php"
 ];
 //$links = [];    //ヘッダ内リンクが無い場合

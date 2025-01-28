@@ -21,7 +21,7 @@
                 include_once('../../include/view/ec_result_msg.php');
                 ?>
 
-                <form class="align-left" method="post" enctype="multipart/form-data" id="manage">
+                <form class="align_left" method="post" enctype="multipart/form-data" id="manage">
                     <input type="hidden" name="post_form" value="registration">
                     <p>商品名　　：<input type="text" name="product_name"></p>
                     <p>価格　　　：<input type="text" name="price"></p>

@@ -17,7 +17,7 @@
 
     main {
         position: absolute;
-        top: 90px;
+        top: 120px;
         left: 0px;
         width: 100%;
         z-index: -1;
@@ -126,7 +126,6 @@
     }
 
     .title {
-        margin-top: 20px;
         margin-bottom: 20px;
     }
 
@@ -143,7 +142,7 @@
         margin: 0 auto;
     }
 
-    .align-left {
+    .align_left {
         text-align: left;
     }
 
@@ -255,13 +254,25 @@
         margin: 0;
     }
 
-    .cart_list {
+    .cart_list,.thankyou_list {
         margin: 30px auto;
         border: 1px solid #000000;
     }
 
-    .cart_list td {
+    .cart_list td,.thankyou_list td {
         border: 1px solid #9ba88d;
+    }
+
+    .cart_list img {
+        max-width: 120px;
+        margin: 10px;
+        object-fit: contain;
+    }
+
+    .thankyou_list img {
+        max-width: 160px;
+        margin: 10px;
+        object-fit: contain;
     }
 
     .cart_list td:nth-child(1) {
@@ -284,17 +295,27 @@
         width: 130px;
     }
 
-    .cart_list img {
-        max-width: 120px;
-        margin: 10px;
-        object-fit: contain;
+    .thankyou_list td:nth-child(1) {
+        width: 200px;
     }
 
-    .purchase {
-        margin: 0;
+    .thankyou_list td:nth-child(2) {
+        width: 272px;
+    }
+
+    .thankyou_list td:nth-child(3) {
+        width: 150px;
+    }
+
+    .thankyou_list td:nth-child(4) {
+        width: 150px;
+    }
+
+    .subtotal {
+        margin: 0 0 20px 0;
         text-align: right;
         color: #4F2469;
-        font-size: 20px;
+        font-size: 22px;
         font-weight: bold;
     }
 

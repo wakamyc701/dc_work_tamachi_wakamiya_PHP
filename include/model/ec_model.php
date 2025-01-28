@@ -526,10 +526,12 @@ function get_list_cart($db) {
             $price_sum += $row['price'];
         }
     }
-    echo '<table>';
-    echo '<form method="post"><p class="purchase">小計：　' . $price_sum . '円
-        <button class="form_btn" name="post_form" value="confirm_order">購入する</button>
-    </p></button>';
+    echo '</table>';
+    echo '<form method="post">
+        <p class="subtotal">小計：　' . $price_sum . '円
+        <button class="form_btn" name="post_form" value="confirm_order">購入する</button></p>
+    </form>';
+    $_SESSION['price_sum'] = $price_sum;
 }
 
 /**
@@ -598,5 +600,52 @@ function del_order($db) {
  */
 function confirm_order($db) {
     //在庫数から注文数を引く。不足があったらロールバックとエラーメッセージ。これを商品ごとに。
-    suc_msg('注文確定');
+    $cart_id = $_SESSION['cart_id'];
+    $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_STOCK . ".stock_qty 
+    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY product_id";
+    $stmt = $db->query($sql);
+
+    $db->beginTransaction();
+    foreach ($stmt as $row) {
+        if ($row['product_qty'] > $row['stock_qty']) {
+            $db->rollback();
+            err_msg($row['product_name'] . ' の在庫数が不足しています。');
+            return;
+        } else {
+            $stock_next = $row['stock_qty'] - $row['product_qty'];
+            $sql_stock_update = "UPDATE " . DB_STOCK . " SET stock_qty = " . $stock_next . " , update_date =  '" . get_date() . "'
+            WHERE product_id = " . $row['product_id'] . "";
+            $stmt = $db->query($sql_stock_update);
+        }
+    }
+    $db->commit();
+    //suc_msg('注文確定：' . $_SESSION['price_sum'] . '円');
+    header('Location: ./thankyou.php');
+    exit();
+}
+
+/**
+ * 購入完了画面の商品リスト作成
+ * thankyou.phpにて使用
+ * 
+ * @param object $db
+ */
+function get_list_thankyou($db) {
+    //suc_msg('注文確定：' . $_SESSION['price_sum'] . '円');
+    $cart_id = $_SESSION['cart_id'];
+    $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_IMAGE . ".image_name 
+    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY product_id";
+    $stmt = $db->query($sql);
+
+    echo '<table class="thankyou_list">';
+    foreach ($stmt as $row) {
+        echo '<tr>
+            <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
+            <td>' . $row['product_name'] . '</td>
+            <td>価格：' . $row['price'] . '円</td>
+            <td>注文数：' . $row['product_qty'] . '点</td>
+        </tr>';
+    }
+    echo '</table>';
+    $_SESSION['purchased'] = 1;
 }
