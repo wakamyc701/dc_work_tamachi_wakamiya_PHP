@@ -499,7 +499,7 @@ function get_list_cart($db) {
     }
 
     $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
-    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY product_id";
+    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY order_id";
     $stmt = $db->query($sql);
 
     $price_sum = 0;
@@ -528,7 +528,7 @@ function get_list_cart($db) {
     }
     echo '</table>';
     echo '<form method="post">
-        <p class="subtotal">小計：　' . $price_sum . '円
+        <p class="purple_text subtotal">小計：　' . $price_sum . '円
         <button class="form_btn" name="post_form" value="confirm_order">購入する</button></p>
     </form>';
     $_SESSION['price_sum'] = $price_sum;
@@ -602,7 +602,7 @@ function confirm_order($db) {
     //在庫数から注文数を引く。不足があったらロールバックとエラーメッセージ。これを商品ごとに。
     $cart_id = $_SESSION['cart_id'];
     $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_STOCK . ".stock_qty 
-    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY product_id";
+    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY order_id";
     $stmt = $db->query($sql);
 
     $db->beginTransaction();
@@ -634,7 +634,7 @@ function get_list_thankyou($db) {
     //suc_msg('注文確定：' . $_SESSION['price_sum'] . '円');
     $cart_id = $_SESSION['cart_id'];
     $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_IMAGE . ".image_name 
-    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY product_id";
+    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY order_id";
     $stmt = $db->query($sql);
 
     echo '<table class="thankyou_list">';
@@ -648,4 +648,43 @@ function get_list_thankyou($db) {
     }
     echo '</table>';
     $_SESSION['purchased'] = 1;
+}
+
+/**
+ * 購入履歴画面の商品リスト作成
+ * history.phpにて使用
+ * 
+ * @param object $db
+ */
+function get_list_history($db) {
+    $user_id = $_SESSION['user_id'];
+    $sql_cart = "SELECT cart_id, create_date FROM " . DB_CART . " WHERE user_id = " . $user_id . " ORDER BY cart_id DESC";
+    $stmt_cart = $db->query($sql_cart);
+    foreach ($stmt_cart as $row) {
+        $sql_order = "SELECT " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
+        FROM " . DB_ORDER . " LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $row['cart_id'] . " ORDER BY order_id";
+        $stmt_order = $db->query($sql_order);
+
+        echo '<p class="history_list_top purple_text">ご注文日：' . date('Y年m月d日' ,strtotime($row['create_date'])) . '</p>';
+        echo '<table class="history_list">';
+        foreach ($stmt_order as $row2) {
+            echo '<tr>
+                <td><a href="../ec_site/img/' . $row2['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row2['image_name'] . '"></a></td>
+                <td>' . $row2['product_name'] . '</td>
+                <td>価格：' . $row2['price'] . '円</td>
+                <td>注文数：' . $row2['product_qty'] . '点</td>
+                <td>';
+                if ($row2["stock_qty"] == 0) {
+                    echo '<p class="red_text">売り切れ</p>';
+                } else {
+                    echo '<form method="post">
+                        <input type="hidden" name="select_product_name" value="' .$row2['product_name'] . '">
+                        <button name="select_product_id" value="' . $row2['product_id'] . '">カートに入れる</button>
+                    </form>';
+                }
+            echo '</td>
+            </tr>';
+        }
+        echo '</table>';
+    }
 }

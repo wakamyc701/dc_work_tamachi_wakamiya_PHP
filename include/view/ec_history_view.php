@@ -17,7 +17,7 @@
                 <h2 class="title">購入履歴</h2>
                 <?php
                 include_once('../../include/view/ec_result_msg.php');
-                //get_list_thankyou($db);
+                get_list_history($db);
                 ?>
             </div>
         </main>
