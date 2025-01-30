@@ -13,7 +13,7 @@
         ?>
 
         <main>
-            <div class="wrapper_main">
+            <div class="wrapper_middle">
                 <h2 class="title">購入履歴</h2>
                 <?php
                 include_once('../../include/view/ec_result_msg.php');

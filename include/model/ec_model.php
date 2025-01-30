@@ -410,7 +410,7 @@ function get_list_catalog($db) {
             } else {
                 echo '<form method="post">
                     <input type="hidden" name="select_product_name" value="' .$row['product_name'] . '">
-                    <button name="select_product_id" value="' . $row['product_id'] . '">カートに入れる</button>
+                    <button name="select_product_id" value="' . $row['product_id'] . '">カートに追加する</button>
                 </form>';
             }
         echo '</div>';
@@ -419,8 +419,8 @@ function get_list_catalog($db) {
 }
 
 /**
- * 商品一覧画面でカートに入れるボタンが押された場合の挙動
- * catalog.phpにて使用
+ * 商品一覧画面と購入履歴画面でカートに入れるボタンが押された場合の挙動
+ * catalog.phpとhistory.phpにて使用
  * 
  * @param object $db
  */
@@ -476,8 +476,13 @@ function post_catalog ($db) {
 
             $db->commit();
             suc_msg($select_product_name . ' をカートに追加しました');
-            header('Location: ./catalog.php');
-            exit();
+            if ($_SESSION['page_now'] == 'catalog') {
+                header('Location: ./catalog.php');
+                exit();
+            } elseif ($_SESSION['page_now'] == 'history') {
+                header('Location: ./history.php');
+                exit();
+            }
         } catch (PDOException $e){
             $db->rollback();
             err_msg('カートに商品を追加できませんでした。再度お試しください。');
@@ -658,31 +663,32 @@ function get_list_thankyou($db) {
  */
 function get_list_history($db) {
     $user_id = $_SESSION['user_id'];
-    $sql_cart = "SELECT cart_id, create_date FROM " . DB_CART . " WHERE user_id = " . $user_id . " ORDER BY cart_id DESC";
+    $sql_cart = "SELECT cart_id, price_sum, create_date FROM " . DB_CART . " WHERE user_id = " . $user_id . " ORDER BY cart_id DESC";
     $stmt_cart = $db->query($sql_cart);
     foreach ($stmt_cart as $row) {
         $sql_order = "SELECT " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
         FROM " . DB_ORDER . " LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $row['cart_id'] . " ORDER BY order_id";
         $stmt_order = $db->query($sql_order);
 
-        echo '<p class="history_list_top purple_text">ご注文日：' . date('Y年m月d日' ,strtotime($row['create_date'])) . '</p>';
         echo '<table class="history_list">';
+        echo '<tr><td colspan="2" class="borderless"><div class="history_list_left purple_text">ご注文日：' . date('Y年m月d日' ,strtotime($row['create_date'])) . '</div></td>
+        <td colspan="2" class="borderless"><div class="history_list_right purple_text">小計：　' . $row['price_sum'] . '円</div></td></tr>';
         foreach ($stmt_order as $row2) {
             echo '<tr>
                 <td><a href="../ec_site/img/' . $row2['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row2['image_name'] . '"></a></td>
-                <td>' . $row2['product_name'] . '</td>
-                <td>価格：' . $row2['price'] . '円</td>
-                <td>注文数：' . $row2['product_qty'] . '点</td>
-                <td>';
+                <td>' . $row2['product_name'] . '<BR>';
                 if ($row2["stock_qty"] == 0) {
-                    echo '<p class="red_text">売り切れ</p>';
+                    echo '<div class="red_text">売り切れ</div>';
                 } else {
                     echo '<form method="post">
                         <input type="hidden" name="select_product_name" value="' .$row2['product_name'] . '">
-                        <button name="select_product_id" value="' . $row2['product_id'] . '">カートに入れる</button>
+                        <button name="select_product_id" value="' . $row2['product_id'] . '">カートに1点追加する</button>
                     </form>';
                 }
-            echo '</td>
+                echo '</td>
+                <td>価格：' . $row2['price'] . '円<BR>';
+                echo '</td>
+                <td>注文数：' . $row2['product_qty'] . '点</td>
             </tr>';
         }
         echo '</table>';

@@ -28,6 +28,8 @@ try{
     exit();
 }
 
+post_catalog($db);
+
 $links = [
     "商品一覧" => "catalog.php",
     "カート" => "cart.php",

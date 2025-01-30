@@ -13,7 +13,7 @@
         ?>
 
         <main>
-            <div class="wrapper_main">
+            <div class="wrapper_middle">
                 <?php
                 suc_msg('ご注文を承りました。お買い上げありがとうございます！');
                 include_once('../../include/view/ec_result_msg.php');
