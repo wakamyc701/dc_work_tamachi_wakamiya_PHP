@@ -5,7 +5,7 @@
         <?php
         include_once ('../../include/view/ec_style.php');
         ?>
-        <title>ECサイト 購入完了ページ</title>
+        <title>わぁ！菓子屋さん本舗｜購入完了ページ</title>
     </head>
     <body>
         <?php

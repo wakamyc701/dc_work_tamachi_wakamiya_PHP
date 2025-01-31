@@ -6,6 +6,7 @@ $user_password;
 $create_date;
 $update_date;
 $cart_id;
+$price_sum;
 $order_id;
 $product_id;
 $product_qty;
@@ -327,12 +328,15 @@ function get_list_manage ($db) {
  * @param object $db
  */
 function change_stock_qty ($db) {
-    if (!check_int_0($_POST['stock_qty'])) {
+    $product_id = $_POST['product_id'];
+    $stock_qty_next = mb_convert_kana($_POST['stock_qty'], 'n');
+
+    if (!check_int_0($stock_qty_next)) {
         err_msg('在庫数を0以上の整数にしてください');
         return;
     }
-    $sql = "UPDATE " . DB_STOCK . " SET stock_qty = " . $_POST['stock_qty'] . ", update_date = '" . get_date() . "' 
-    WHERE product_id = " . $_POST['product_id'] . "";
+    $sql = "UPDATE " . DB_STOCK . " SET stock_qty = " . $stock_qty_next . ", update_date = '" . get_date() . "' 
+    WHERE product_id = " . $product_id . "";
     $stmt = $db->query($sql);
     if ($stmt) {
         suc_msg('在庫数を変更しました');
@@ -350,8 +354,11 @@ function change_stock_qty ($db) {
  * @param object $db
  */
 function change_public_flg ($db) {
-    $sql = "UPDATE " . DB_PRODUCT . " SET public_flg = " . $_POST['next_flg'] . ", update_date = '" . get_date() . "' 
-    WHERE product_id = " . $_POST['product_id'] . "";
+    $product_id = $_POST['product_id'];
+    $next_flg = $_POST['next_flg'];
+
+    $sql = "UPDATE " . DB_PRODUCT . " SET public_flg = " . $next_flg . ", update_date = '" . get_date() . "' 
+    WHERE product_id = " . $product_id . "";
     $stmt = $db->query($sql);
     if ($stmt) {
         suc_msg('公開フラグを変更しました');
@@ -467,13 +474,6 @@ function post_catalog ($db) {
                 $stmt = $db->query($sql_order_update);
             }
 
-            /*
-            //在庫を1減らす
-            $sql_stock_decrease = "UPDATE " . DB_STOCK . " SET stock_qty = stock_qty - 1 , update_date =  '" . get_date() . "' 
-            WHERE product_id = '" . $select_product_id . "'";
-            $stmt = $db->query($sql_stock_decrease);
-            */
-
             $db->commit();
             suc_msg($select_product_name . ' をカートに追加しました');
             if ($_SESSION['page_now'] == 'catalog') {
@@ -566,7 +566,7 @@ function post_cart($db) {
 function change_product_qty($db) {
     $select_order_id = $_POST['order_id'];
     $select_product_name = $_POST['product_name'];
-    $select_product_qty = $_POST['product_qty'];
+    $select_product_qty = mb_convert_kana($_POST['product_qty'], 'n');
 
     if ((!check_int_0($select_product_qty)) or ($select_product_qty == 0)) {
         err_msg('注文数を1以上の整数にしてください');
@@ -604,8 +604,9 @@ function del_order($db) {
  * @param object $db
  */
 function confirm_order($db) {
-    //在庫数から注文数を引く。不足があったらロールバックとエラーメッセージ。これを商品ごとに。
     $cart_id = $_SESSION['cart_id'];
+    $price_sum = $_SESSION['price_sum'];
+
     $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_STOCK . ".stock_qty 
     FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY order_id";
     $stmt = $db->query($sql);
@@ -624,7 +625,9 @@ function confirm_order($db) {
         }
     }
     $db->commit();
-    //suc_msg('注文確定：' . $_SESSION['price_sum'] . '円');
+
+    $sql_cart_update = "UPDATE " . DB_CART . " SET price_sum = " . $price_sum . " , update_date =  '" . get_date() . "' WHERE cart_id = " . $cart_id . "";
+    $stmt = $db->query($sql_cart_update);
     header('Location: ./thankyou.php');
     exit();
 }
@@ -636,8 +639,8 @@ function confirm_order($db) {
  * @param object $db
  */
 function get_list_thankyou($db) {
-    //suc_msg('注文確定：' . $_SESSION['price_sum'] . '円');
     $cart_id = $_SESSION['cart_id'];
+
     $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_IMAGE . ".image_name 
     FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY order_id";
     $stmt = $db->query($sql);
@@ -663,10 +666,11 @@ function get_list_thankyou($db) {
  */
 function get_list_history($db) {
     $user_id = $_SESSION['user_id'];
-    $sql_cart = "SELECT cart_id, price_sum, create_date FROM " . DB_CART . " WHERE user_id = " . $user_id . " ORDER BY cart_id DESC";
+
+    $sql_cart = "SELECT cart_id, price_sum, create_date FROM " . DB_CART . " WHERE user_id = " . $user_id . " AND price_sum IS NOT NULL ORDER BY cart_id DESC";
     $stmt_cart = $db->query($sql_cart);
     foreach ($stmt_cart as $row) {
-        $sql_order = "SELECT " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
+        $sql_order = "SELECT " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_PRODUCT . ".public_flg, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
         FROM " . DB_ORDER . " LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $row['cart_id'] . " ORDER BY order_id";
         $stmt_order = $db->query($sql_order);
 
@@ -678,7 +682,9 @@ function get_list_history($db) {
                 <td><a href="../ec_site/img/' . $row2['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row2['image_name'] . '"></a></td>
                 <td>' . $row2['product_name'] . '<BR>';
                 if ($row2["stock_qty"] == 0) {
-                    echo '<div class="red_text">売り切れ</div>';
+                    echo '<div class="small_text red_text">現在売り切れ中です</div>';
+                } elseif ($row2["public_flg"] == 0) {
+                    echo '<div class="small_text red_text">現在ご注文いただけません</div>';
                 } else {
                     echo '<form method="post">
                         <input type="hidden" name="select_product_name" value="' .$row2['product_name'] . '">

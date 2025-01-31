@@ -256,6 +256,11 @@
         font-weight: bold;
     }
 
+    .purple_text {
+        color: #4F2469;
+        font-weight: bold;
+    }
+
     .small_text {
         font-size: 14px;
         margin: 0;
@@ -290,7 +295,7 @@
     }
 
     .cart_list td:nth-child(2) {
-        width: 200px;
+        width: 216px;
     }
 
     .cart_list td:nth-child(3) {
@@ -298,54 +303,33 @@
     }
 
     .cart_list td:nth-child(4) {
-        width: 176px;
+        width: 160px;
     }
 
     .cart_list td:nth-child(5) {
         width: 130px;
     }
 
-    .thankyou_list td:nth-child(1) {
+    .thankyou_list td:nth-child(1), .history_list td:nth-child(1) {
         width: 140px;
     }
 
-    .thankyou_list td:nth-child(2) {
-        width: 200px;
+    .thankyou_list td:nth-child(2), .history_list td:nth-child(2) {
+        width: 232px;
     }
 
-    .thankyou_list td:nth-child(3) {
-        width: 150px;
+    .thankyou_list td:nth-child(3), .history_list td:nth-child(3) {
+        width: 130px;
     }
 
-    .thankyou_list td:nth-child(4) {
-        width: 142px;
-    }
-
-    .history_list td:nth-child(1) {
-        width: 140px;
-    }
-
-    .history_list td:nth-child(2) {
-        width: 200px;
-    }
-
-    .history_list td:nth-child(3) {
-        width: 150px;
-    }
-
-    .history_list td:nth-child(4) {
-        width: 142px;
+    .thankyou_list td:nth-child(4), .history_list td:nth-child(4) {
+        width: 130px;
     }
 
     .subtotal {
         margin: 0 0 20px 0;
         text-align: right;
         font-size: 22px;
-    }
-
-    .purple_text {
-        color: #4F2469;
-        font-weight: bold;
     }
 
     .history_list_left {
