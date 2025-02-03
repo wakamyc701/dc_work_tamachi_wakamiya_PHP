@@ -52,11 +52,15 @@
     }
 
     .list_bg0 {
-        background-color: #9ba88d;
+        background-color: #f6bfbc;
     }
 
     .list_bg1 {
         background-color: #ffffff;
+    }
+
+    .list_bg2 {
+        background-color: #9e9478;
     }
 
     .product_list th, td {

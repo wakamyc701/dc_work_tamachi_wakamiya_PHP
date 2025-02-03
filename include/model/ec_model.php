@@ -129,7 +129,6 @@ function login_check($db){
  * registration.phpにて使用
  * 
  * @param object $db
- * @return array
  */
 function user_registration($db) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -311,9 +310,11 @@ function get_list_manage ($db) {
                 if ($row['public_flg'] == 1) {
                     echo '<td><input type="hidden" name="next_flg" value="0">
                     <button name="post_form" value="change_public_flg">非公開にする</button></td>';
-                } else {
+                } elseif ($row['public_flg'] == 0) {
                     echo '<td><input type="hidden" name="next_flg" value="1">
                     <button name="post_form" value="change_public_flg">公開にする</button></td>';
+                } elseif ($row['public_flg'] == 2) {
+                    echo '<td><div class="red_text">販売終了品</div></td>';
                 }
                 echo '<td><button name="post_form" value="del_product">削除する</button></td>
             </tr>
@@ -376,6 +377,7 @@ function change_public_flg ($db) {
  * @param object $db
  */
 function del_product ($db) {
+    /* DBから削除する場合の処理
     $sql_product = "DELETE FROM " . DB_PRODUCT . " WHERE product_id = " . $_POST['product_id'] . "";
     $sql_image = "DELETE FROM " . DB_IMAGE . " WHERE product_id = " . $_POST['product_id'] . "";
     $sql_stock = "DELETE FROM " . DB_STOCK . " WHERE product_id = " . $_POST['product_id'] . "";
@@ -392,6 +394,19 @@ function del_product ($db) {
     } catch (PDOException $e){
         $db->rollback();
         err_msg('商品を削除できませんでした');
+    }
+    */
+    $product_id = $_POST['product_id'];
+
+    $sql = "UPDATE " . DB_PRODUCT . " SET public_flg = 2, update_date = '" . get_date() . "' 
+    WHERE product_id = " . $product_id . "";
+    $stmt = $db->query($sql);
+    if ($stmt) {
+        suc_msg('商品を削除しました');
+        header('Location: ./manage.php');
+        exit();
+    } else {
+        err_msg('商品を削除できませんでした。再度お試しください。');
     }
 }
 
@@ -626,7 +641,7 @@ function confirm_order($db) {
     }
     $db->commit();
 
-    $sql_cart_update = "UPDATE " . DB_CART . " SET price_sum = " . $price_sum . " , update_date =  '" . get_date() . "' WHERE cart_id = " . $cart_id . "";
+    $sql_cart_update = "UPDATE " . DB_CART . " SET purchased_flg = 1 , update_date =  '" . get_date() . "' WHERE cart_id = " . $cart_id . "";
     $stmt = $db->query($sql_cart_update);
     header('Location: ./thankyou.php');
     exit();
@@ -667,24 +682,24 @@ function get_list_thankyou($db) {
 function get_list_history($db) {
     $user_id = $_SESSION['user_id'];
 
-    $sql_cart = "SELECT cart_id, price_sum, create_date FROM " . DB_CART . " WHERE user_id = " . $user_id . " AND price_sum IS NOT NULL ORDER BY cart_id DESC";
+    $sql_cart = "SELECT cart_id, create_date FROM " . DB_CART . " WHERE user_id = " . $user_id . " AND purchased_flg = 1 ORDER BY cart_id DESC";
     $stmt_cart = $db->query($sql_cart);
     foreach ($stmt_cart as $row) {
+        $price_sum = 0;
         $sql_order = "SELECT " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_PRODUCT . ".public_flg, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
         FROM " . DB_ORDER . " LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $row['cart_id'] . " ORDER BY order_id";
         $stmt_order = $db->query($sql_order);
 
         echo '<table class="history_list">';
-        echo '<tr><td colspan="2" class="borderless"><div class="history_list_left purple_text">ご注文日：' . date('Y年m月d日' ,strtotime($row['create_date'])) . '</div></td>
-        <td colspan="2" class="borderless"><div class="history_list_right purple_text">小計：　' . $row['price_sum'] . '円</div></td></tr>';
+        echo '<tr><td colspan="4" class="borderless"><div class="history_list_left purple_text">ご注文日：' . date('Y年m月d日' ,strtotime($row['create_date'])) . '</div></td></tr>';
         foreach ($stmt_order as $row2) {
             echo '<tr>
                 <td><a href="../ec_site/img/' . $row2['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row2['image_name'] . '"></a></td>
                 <td>' . $row2['product_name'] . '<BR>';
-                if ($row2["stock_qty"] == 0) {
-                    echo '<div class="small_text red_text">現在売り切れ中です</div>';
-                } elseif ($row2["public_flg"] == 0) {
+                if ($row2["public_flg"] != 1) {
                     echo '<div class="small_text red_text">現在ご注文いただけません</div>';
+                } elseif ($row2["stock_qty"] == 0) {
+                    echo '<div class="small_text red_text">現在売り切れ中です</div>';
                 } else {
                     echo '<form method="post">
                         <input type="hidden" name="select_product_name" value="' .$row2['product_name'] . '">
@@ -696,7 +711,11 @@ function get_list_history($db) {
                 echo '</td>
                 <td>注文数：' . $row2['product_qty'] . '点</td>
             </tr>';
+            for ($i = 0; $i < $row2['product_qty']; $i++) {
+                $price_sum += $row2['price'];
+            }
         }
+        echo '<tr><td colspan="4" class="borderless"><div class="history_list_right purple_text">小計：　' . $price_sum . '円</div></td></tr>';
         echo '</table>';
     }
 }
