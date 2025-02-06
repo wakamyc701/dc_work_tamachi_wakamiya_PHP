@@ -23,6 +23,7 @@ if ($_SESSION['purchased']) {   //購入完了後に遷移した場合はカー�
 try{
     $db = connect_db();
     $db->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+    // echo 'データベース接続成功';
 } catch (PDOException $e){
     echo $e->getMessage();
     exit();
@@ -35,7 +36,6 @@ $links = [
     "カート" => "cart.php",
     "ログアウト" => "logout.php"
 ];
-//$links = [];    //ヘッダ内リンクが無い場合
 
 include ('../../include/view/ec_history_view.php');
 

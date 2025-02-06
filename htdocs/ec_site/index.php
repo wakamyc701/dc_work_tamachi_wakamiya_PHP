@@ -25,12 +25,7 @@ try{
     exit();
 }
 
-/* ヘッダ内のリンクは以下のように記述
-$links = [
-    "リンクA" => "index.php",
-    "リンクB" => "index.php",
-];*/
-$links = [];    //ヘッダ内リンクが無い場合
+$links = [];
 $btn_title = 'ログインする';
 
 include ('../../include/view/ec_index_view.php');

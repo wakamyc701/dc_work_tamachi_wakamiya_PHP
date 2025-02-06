@@ -24,7 +24,7 @@ $stock_qty;
  * @return object $db
  */
 function connect_db() {
-    $db = new PDO(DSN,LOGIN_USER,PASSWORD);
+    $db = new PDO(DSN, LOGIN_USER, PASSWORD);
     return $db;
 }
 
@@ -80,7 +80,7 @@ function clr_msg () {
  * 値が0以上の整数であることの確認
  * 
  * @param int
- * @return int
+ * @return int 1もしくは0
  */
 function check_int_0($num) {
     if (preg_match("/^[0-9]+$/", $num)) {
@@ -102,7 +102,8 @@ function login_check($db){
         $user_name = h($_POST['user_name']);
         $user_password = h($_POST['user_password']);
 
-        $sql = "SELECT user_id, user_password FROM ".DB_USER." WHERE user_name = '$user_name' LIMIT 1";
+        $sql = "SELECT user_id, user_password FROM " . DB_USER . " 
+        WHERE user_name = '" . $user_name . "' LIMIT 1";
         $stmt = $db->query($sql);
         $result = $stmt->fetch();
         //var_dump($result);
@@ -141,7 +142,7 @@ function user_registration($db) {
             err_msg('登録できないパスワードです。');
         } else {
             $sql = "INSERT INTO " .DB_USER. " (user_name, user_password, create_date, update_date) 
-            VALUES ('$user_name', '$user_password', '".get_date()."', '".get_date()."' )";
+            VALUES ('" . $user_name . "', '" . $user_password . "', '" . get_date() . "', '" . get_date() . "' )";
 
             try {
                 $stmt = $db->query($sql);
@@ -149,8 +150,6 @@ function user_registration($db) {
                 header('Location: ./registration.php');
                 exit();
             } catch (PDOException $e){
-                //echo $e->getMessage();
-                //print_r($db->errorInfo());
                 $errinfo = $db->errorInfo();
                 if ($errinfo[1] == '1062') {    //既に存在するユーザー名と重複
                     err_msg('登録できないユーザー名です。');
@@ -228,8 +227,8 @@ function product_registration_sql ($db){
     $db->beginTransaction();   //トランザクション開始
 
     //ec_productへのinsert
-    $sql_product = "INSERT INTO " .DB_PRODUCT. " (product_name, price, public_flg, create_date, update_date) 
-    VALUES ('$product_name', '$price', '$public_fig', '".get_date()."', '".get_date()."' )";
+    $sql_product = "INSERT INTO " . DB_PRODUCT . " (product_name, price, public_flg, create_date, update_date) 
+    VALUES ('" . $product_name . "', '" . $price. "', '" . $public_fig. "', '" . get_date() . "', '" . get_date() . "' )";
     try {
         $stmt = $db->query($sql_product);
     } catch (PDOException $e){
@@ -246,7 +245,7 @@ function product_registration_sql ($db){
 
     //ec_stockへのinsert
     $sql_stock = "INSERT INTO " .DB_STOCK. " (product_id, stock_qty, create_date, update_date) 
-    VALUES ('$product_id', '$stock_qty', '".get_date()."', '".get_date()."' )";
+    VALUES ('" . $product_id . "', '" . $stock_qty . "', '" . get_date() . "', '" . get_date() . "' )";
     try {
         $stmt = $db->query($sql_stock);
     } catch (PDOException $e){
@@ -264,7 +263,7 @@ function product_registration_sql ($db){
 
     //ec_imageへのinsert
     $sql_image = "INSERT INTO " .DB_IMAGE. " (product_id, image_name, create_date, update_date) 
-    VALUES ('$product_id', '$image_name', '".get_date()."', '".get_date()."' )";
+    VALUES ('" . $product_id . "', '" . $image_name . "', '" . get_date() . "', '" . get_date() . "' )";
     try {
         $stmt = $db->query($sql_image);
     } catch (PDOException $e){
@@ -276,7 +275,7 @@ function product_registration_sql ($db){
     //画像のアップロード
     $save = '../ec_site/img/' . $image_name;
 
-    if(move_uploaded_file($upload_image['tmp_name'],$save)){
+    if(move_uploaded_file($upload_image['tmp_name'], $save)){
         $db->commit();  //アップロード成功
         suc_msg('商品登録完了しました');
         header('Location: ./manage.php');
@@ -294,15 +293,18 @@ function product_registration_sql ($db){
  * @param object $db
  */
 function get_list_manage ($db) {
-    $sql = "SELECT " . DB_PRODUCT . ".product_id, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_PRODUCT . ".public_flg, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
-    FROM " . DB_PRODUCT . " LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) ORDER BY product_id";
+    $sql = "SELECT " . DB_PRODUCT . ".product_id, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " 
+    . DB_PRODUCT . ".public_flg, " . DB_PRODUCT . ".handle_flg, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
+    FROM " . DB_PRODUCT . " LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) 
+    WHERE handle_flg = 1 ORDER BY product_id";
     $stmt = $db->query($sql);
 
     foreach($stmt as $row) {
         echo '<form method="post">
             <input type="hidden" name="product_id" value="' .$row['product_id'] . '">
             <tr class="list_bg' . $row['public_flg'] . '">
-                <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
+                <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank">
+                <img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
                 <td>' . $row['product_name'] . '</td>
                 <td>' . $row['price'] . '</td>
                 <td><input type="text" class="input_value" name="stock_qty" value="' .$row['stock_qty'] . '">
@@ -398,7 +400,7 @@ function del_product ($db) {
     */
     $product_id = $_POST['product_id'];
 
-    $sql = "UPDATE " . DB_PRODUCT . " SET public_flg = 2, update_date = '" . get_date() . "' 
+    $sql = "UPDATE " . DB_PRODUCT . " SET public_flg = 0, handle_flg = 0, update_date = '" . get_date() . "' 
     WHERE product_id = " . $product_id . "";
     $stmt = $db->query($sql);
     if ($stmt) {
@@ -417,14 +419,17 @@ function del_product ($db) {
  * @param object $db
  */
 function get_list_catalog($db) {
-    $sql = "SELECT " . DB_PRODUCT . ".product_id, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_PRODUCT . ".public_flg, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
-    FROM " . DB_PRODUCT . " LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE public_flg = 1 ORDER BY product_id";
+    $sql = "SELECT " . DB_PRODUCT . ".product_id, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " 
+    . DB_PRODUCT . ".public_flg, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
+    FROM " . DB_PRODUCT . " LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) 
+    WHERE public_flg = 1 ORDER BY product_id";
     $stmt = $db->query($sql);
 
     echo '<div class="catalog_container">';
     foreach($stmt as $row) {
         echo '<div class="catalog_element">
-            <a href="../ec_site/img/' . $row["image_name"] . '" target="_blank"><img src="../ec_site/img/' . $row["image_name"] . '"></a>
+            <a href="../ec_site/img/' . $row["image_name"] . '" target="_blank">
+            <img src="../ec_site/img/' . $row["image_name"] . '"></a>
             <h3>' . $row["product_name"] . '</h3>
             <p>' . $row["price"] . '円</p>';
             if ($row["stock_qty"] == 0) {
@@ -474,17 +479,20 @@ function post_catalog ($db) {
 
         try {
             //ec_orderに、対応する商品のレコードを作る。既にある場合はproduct_qtyを増やす
-            $eql_order_select = "SELECT order_id FROM " . DB_ORDER . " WHERE cart_id = " . $cart_id . " AND product_id = " . $select_product_id . "";
+            $eql_order_select = "SELECT order_id FROM " . DB_ORDER . " 
+            WHERE cart_id = " . $cart_id . " AND product_id = " . $select_product_id . "";
             $stmt = $db->query($eql_order_select);
             $result = $stmt->fetch();
 
             if (!$result) {
-                $sql_order_insert = "INSERT INTO " . DB_ORDER . " (cart_id, product_id, product_qty, create_date, update_date) 
+                $sql_order_insert = "INSERT INTO " . DB_ORDER . " (cart_id, product_id, product_qty, 
+                create_date, update_date) 
                 VALUES (" . $cart_id . ", " . $select_product_id . ", 1, '" . get_date() . "', '" . get_date() . "')";
                 $stmt = $db->query($sql_order_insert);
             } else {
                 //レコードが存在するので、商品数を1増やす
-                $sql_order_update = "UPDATE " . DB_ORDER . " SET product_qty = product_qty + 1, update_date =  '" . get_date() . "' 
+                $sql_order_update = "UPDATE " . DB_ORDER . " 
+                SET product_qty = product_qty + 1, update_date =  '" . get_date() . "' 
                 WHERE order_id = " . $result['order_id'] . "";
                 $stmt = $db->query($sql_order_update);
             }
@@ -518,8 +526,12 @@ function get_list_cart($db) {
         return;        
     }
 
-    $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
-    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY order_id";
+    $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " 
+    . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " 
+    . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
+    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) 
+    LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) 
+    WHERE cart_id = " . $cart_id . " ORDER BY order_id";
     $stmt = $db->query($sql);
 
     $price_sum = 0;
@@ -533,7 +545,8 @@ function get_list_cart($db) {
             <input type="hidden" name="order_id" value="' .$row['order_id'] . '">
             <input type="hidden" name="product_name" value="' .$row['product_name'] . '">
             <tr>
-                <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
+                <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank">
+                <img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
                 <td>' . $row['product_name'] . '</td>
                 <td>価格：' . $row['price'] . '円</td>
                 <td><p class="small_text red_text">' . $row['stock_qty'] . '点まで注文できます</p>
@@ -588,7 +601,8 @@ function change_product_qty($db) {
         return;
     }
 
-    $sql_order_update = "UPDATE " . DB_ORDER . " SET product_qty = " . $select_product_qty . ", update_date =  '" . get_date() . "' 
+    $sql_order_update = "UPDATE " . DB_ORDER . " 
+    SET product_qty = " . $select_product_qty . ", update_date =  '" . get_date() . "' 
     WHERE order_id = " . $select_order_id . "";
     $stmt = $db->query($sql_order_update);
 
@@ -622,8 +636,11 @@ function confirm_order($db) {
     $cart_id = $_SESSION['cart_id'];
     $price_sum = $_SESSION['price_sum'];
 
-    $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_STOCK . ".stock_qty 
-    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY order_id";
+    $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " 
+    . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_STOCK . ".stock_qty 
+    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) 
+    LEFT JOIN " . DB_STOCK . " USING(product_id) 
+    WHERE cart_id = " . $cart_id . " ORDER BY order_id";
     $stmt = $db->query($sql);
 
     $db->beginTransaction();
@@ -634,14 +651,16 @@ function confirm_order($db) {
             return;
         } else {
             $stock_next = $row['stock_qty'] - $row['product_qty'];
-            $sql_stock_update = "UPDATE " . DB_STOCK . " SET stock_qty = " . $stock_next . " , update_date =  '" . get_date() . "'
+            $sql_stock_update = "UPDATE " . DB_STOCK . " 
+            SET stock_qty = " . $stock_next . " , update_date =  '" . get_date() . "'
             WHERE product_id = " . $row['product_id'] . "";
             $stmt = $db->query($sql_stock_update);
         }
     }
     $db->commit();
 
-    $sql_cart_update = "UPDATE " . DB_CART . " SET purchased_flg = 1 , update_date =  '" . get_date() . "' WHERE cart_id = " . $cart_id . "";
+    $sql_cart_update = "UPDATE " . DB_CART . " SET purchased_flg = 1 , update_date =  '" . get_date() . "' 
+    WHERE cart_id = " . $cart_id . "";
     $stmt = $db->query($sql_cart_update);
     header('Location: ./thankyou.php');
     exit();
@@ -656,14 +675,18 @@ function confirm_order($db) {
 function get_list_thankyou($db) {
     $cart_id = $_SESSION['cart_id'];
 
-    $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_IMAGE . ".image_name 
-    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) WHERE cart_id = " . $cart_id . " ORDER BY order_id";
+    $sql = "SELECT " . DB_CART . ".cart_id, " . DB_ORDER . ".order_id, " . DB_ORDER . ".product_id, " 
+    . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_IMAGE . ".image_name 
+    FROM " . DB_CART . " LEFT JOIN " . DB_ORDER . " USING(cart_id) LEFT JOIN " . DB_PRODUCT . " USING(product_id) 
+    LEFT JOIN " . DB_IMAGE . " USING(product_id) 
+    WHERE cart_id = " . $cart_id . " ORDER BY order_id";
     $stmt = $db->query($sql);
 
     echo '<table class="thankyou_list">';
     foreach ($stmt as $row) {
         echo '<tr>
-            <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
+            <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank">
+            <img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
             <td>' . $row['product_name'] . '</td>
             <td>価格：' . $row['price'] . '円</td>
             <td>注文数：' . $row['product_qty'] . '点</td>
@@ -682,19 +705,26 @@ function get_list_thankyou($db) {
 function get_list_history($db) {
     $user_id = $_SESSION['user_id'];
 
-    $sql_cart = "SELECT cart_id, create_date FROM " . DB_CART . " WHERE user_id = " . $user_id . " AND purchased_flg = 1 ORDER BY cart_id DESC";
+    $sql_cart = "SELECT cart_id, create_date FROM " . DB_CART . " 
+    WHERE user_id = " . $user_id . " AND purchased_flg = 1 ORDER BY cart_id DESC";
     $stmt_cart = $db->query($sql_cart);
     foreach ($stmt_cart as $row) {
         $price_sum = 0;
-        $sql_order = "SELECT " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_PRODUCT . ".public_flg, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
-        FROM " . DB_ORDER . " LEFT JOIN ". DB_PRODUCT . " USING(product_id) LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) WHERE cart_id = " . $row['cart_id'] . " ORDER BY order_id";
+        $sql_order = "SELECT " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " 
+        . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " . DB_PRODUCT . ".public_flg, " 
+        . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
+        FROM " . DB_ORDER . " LEFT JOIN ". DB_PRODUCT . " USING(product_id) 
+        LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) 
+        WHERE cart_id = " . $row['cart_id'] . " ORDER BY order_id";
         $stmt_order = $db->query($sql_order);
 
         echo '<table class="history_list">';
-        echo '<tr><td colspan="4" class="borderless"><div class="history_list_left purple_text">ご注文日：' . date('Y年m月d日' ,strtotime($row['create_date'])) . '</div></td></tr>';
+        echo '<tr><td colspan="4" class="borderless"><div class="history_list_left purple_text">
+        ご注文日：' . date('Y年m月d日' ,strtotime($row['create_date'])) . '</div></td></tr>';
         foreach ($stmt_order as $row2) {
             echo '<tr>
-                <td><a href="../ec_site/img/' . $row2['image_name'] . '" target="_blank"><img src="../ec_site/img/' . $row2['image_name'] . '"></a></td>
+                <td><a href="../ec_site/img/' . $row2['image_name'] . '" target="_blank">
+                <img src="../ec_site/img/' . $row2['image_name'] . '"></a></td>
                 <td>' . $row2['product_name'] . '<BR>';
                 if ($row2["public_flg"] != 1) {
                     echo '<div class="small_text red_text">現在ご注文いただけません</div>';
@@ -715,7 +745,8 @@ function get_list_history($db) {
                 $price_sum += $row2['price'];
             }
         }
-        echo '<tr><td colspan="4" class="borderless"><div class="history_list_right purple_text">小計：　' . $price_sum . '円</div></td></tr>';
+        echo '<tr><td colspan="4" class="borderless"><div class="history_list_right purple_text">
+        小計：　' . $price_sum . '円</div></td></tr>';
         echo '</table>';
     }
 }

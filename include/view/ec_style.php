@@ -51,18 +51,6 @@
         border: 1px solid #000000;
     }
 
-    .list_bg0 {
-        background-color: #f6bfbc;
-    }
-
-    .list_bg1 {
-        background-color: #ffffff;
-    }
-
-    .list_bg2 {
-        background-color: #9e9478;
-    }
-
     .product_list th, td {
         border: 1px solid #9ba88d;
     }
@@ -95,6 +83,14 @@
         max-width: 120px;
         margin: 10px;
         object-fit: contain;
+    }
+
+    .list_bg0 {
+        background-color: #a6a5c4;
+    }
+
+    .list_bg1 {
+        background-color: #ffffff;
     }
 
     .header_upper {
@@ -201,10 +197,6 @@
     }
 
     .form_btn {
-        /*
-        margin-top: 10px;
-        margin-bottom: 24px;
-        */
         margin: 10px 10px 16px 10px;
         width: 180px;
         height: 30px;

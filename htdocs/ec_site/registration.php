@@ -25,12 +25,7 @@ try{
 }
 user_registration($db);
 
-/* ヘッダ内のリンクは以下のように記述
-$links = [
-    "リンクA" => "index.php",
-    "リンクB" => "index.php",
-];*/
-$links = [];    //ヘッダ内リンクが無い場合
+$links = [];
 $btn_title = 'ユーザー登録する';
 
 include ('../../include/view/ec_registration_view.php');
