@@ -53,7 +53,7 @@ function get_date(){
  * 
  * @param string
  */
-function err_msg ($msg) {
+function err_msg($msg) {
     $_SESSION['err_msg'] = $msg;
     $_SESSION['suc_msg'] = '';
 }
@@ -63,7 +63,7 @@ function err_msg ($msg) {
  * 
  * @param string
  */
-function suc_msg ($msg) {
+function suc_msg($msg) {
     $_SESSION['err_msg'] = '';
     $_SESSION['suc_msg'] = $msg;
 }
@@ -71,7 +71,7 @@ function suc_msg ($msg) {
 /**
  * エラー・成功メッセージをクリア
  */
-function clr_msg () {
+function clr_msg() {
     $_SESSION['err_msg'] = '';
     $_SESSION['suc_msg'] = '';
 }
@@ -103,8 +103,12 @@ function login_check($db){
         $user_password = h($_POST['user_password']);
 
         $sql = "SELECT user_id, user_password FROM " . DB_USER . " 
-        WHERE user_name = '" . $user_name . "' LIMIT 1";
-        $stmt = $db->query($sql);
+        WHERE user_name = :user_name LIMIT 1";
+        $stmt = $db->prepare($sql);
+
+        $stmt -> bindValue(':user_name', $user_name);
+
+        $stmt->execute();
         $result = $stmt->fetch();
         //var_dump($result);
         if ($result == false) {
@@ -142,10 +146,15 @@ function user_registration($db) {
             err_msg('登録できないパスワードです。');
         } else {
             $sql = "INSERT INTO " .DB_USER. " (user_name, user_password, create_date, update_date) 
-            VALUES ('" . $user_name . "', '" . $user_password . "', '" . get_date() . "', '" . get_date() . "' )";
+            VALUES (:user_name, :user_password, '" . get_date() . "', '" . get_date() . "' )";
 
             try {
-                $stmt = $db->query($sql);
+                $stmt = $db->prepare($sql);
+
+                $stmt -> bindValue(':user_name', $user_name);
+                $stmt -> bindValue(':user_password', $user_password);
+
+                $stmt->execute();
                 suc_msg('ユーザー登録が完了しました。');
                 header('Location: ./registration.php');
                 exit();
@@ -187,7 +196,7 @@ function post_manage($db) {
  * 
  * @param object $db
  */
-function product_registration ($db) {
+function product_registration($db) {
     $product_name = $_POST['product_name'];
     $price = $_POST['price'];
     $stock_qty = $_POST['stock_qty'];
@@ -217,7 +226,7 @@ function product_registration ($db) {
  * 
  * @param object $db
  */
-function product_registration_sql ($db){
+function product_registration_sql($db){
     $product_name = $_POST['product_name'];
     $price = $_POST['price'];
     $stock_qty = $_POST['stock_qty'];
@@ -292,7 +301,7 @@ function product_registration_sql ($db){
  * 
  * @param object $db
  */
-function get_list_manage ($db) {
+function get_list_manage($db) {
     $sql = "SELECT " . DB_PRODUCT . ".product_id, " . DB_PRODUCT . ".product_name, " . DB_PRODUCT . ".price, " 
     . DB_PRODUCT . ".public_flg, " . DB_PRODUCT . ".handle_flg, " . DB_IMAGE . ".image_name, " . DB_STOCK . ".stock_qty 
     FROM " . DB_PRODUCT . " LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) 
@@ -307,7 +316,8 @@ function get_list_manage ($db) {
                 <img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
                 <td>' . $row['product_name'] . '</td>
                 <td>' . $row['price'] . '</td>
-                <td><input type="text" class="input_value" name="stock_qty" value="' .$row['stock_qty'] . '">
+                <td><input type="number" class="input_value" name="stock_qty" 
+                value="' .$row['stock_qty'] . '" min="0">
                 <button name="post_form" value="change_stock_qty">在庫数変更</button></td>';
                 if ($row['public_flg'] == 1) {
                     echo '<td><input type="hidden" name="next_flg" value="0">
@@ -315,8 +325,6 @@ function get_list_manage ($db) {
                 } elseif ($row['public_flg'] == 0) {
                     echo '<td><input type="hidden" name="next_flg" value="1">
                     <button name="post_form" value="change_public_flg">公開にする</button></td>';
-                } elseif ($row['public_flg'] == 2) {
-                    echo '<td><div class="red_text">販売終了品</div></td>';
                 }
                 echo '<td><button name="post_form" value="del_product">削除する</button></td>
             </tr>
@@ -330,9 +338,9 @@ function get_list_manage ($db) {
  * 
  * @param object $db
  */
-function change_stock_qty ($db) {
+function change_stock_qty($db) {
     $product_id = $_POST['product_id'];
-    $stock_qty_next = mb_convert_kana($_POST['stock_qty'], 'n');
+    $stock_qty_next = $_POST['stock_qty'];
 
     if (!check_int_0($stock_qty_next)) {
         err_msg('在庫数を0以上の整数にしてください');
@@ -356,7 +364,7 @@ function change_stock_qty ($db) {
  * 
  * @param object $db
  */
-function change_public_flg ($db) {
+function change_public_flg($db) {
     $product_id = $_POST['product_id'];
     $next_flg = $_POST['next_flg'];
 
@@ -378,7 +386,7 @@ function change_public_flg ($db) {
  * 
  * @param object $db
  */
-function del_product ($db) {
+function del_product($db) {
     /* DBから削除する場合の処理
     $sql_product = "DELETE FROM " . DB_PRODUCT . " WHERE product_id = " . $_POST['product_id'] . "";
     $sql_image = "DELETE FROM " . DB_IMAGE . " WHERE product_id = " . $_POST['product_id'] . "";
@@ -451,7 +459,7 @@ function get_list_catalog($db) {
  * 
  * @param object $db
  */
-function post_catalog ($db) {
+function post_catalog($db) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $select_product_id = $_POST['select_product_id'];
         $select_product_name = $_POST['select_product_name'];
@@ -550,7 +558,8 @@ function get_list_cart($db) {
                 <td>' . $row['product_name'] . '</td>
                 <td>価格：' . $row['price'] . '円</td>
                 <td><p class="small_text red_text">' . $row['stock_qty'] . '点まで注文できます</p>
-                注文数<input type="text" class="input_value" name="product_qty" value="' .$row['product_qty'] . '">
+                注文数<input type="number" class="input_value" name="product_qty" 
+                value="' .$row['product_qty'] . '" min="1" max="' . $row['stock_qty'] . '">
                 <button name="post_form" value="change_product_qty">注文数変更</button></td>
                 <td><button name="post_form" value="del_order">カートから削除</button></td>
             </tr>
@@ -594,7 +603,7 @@ function post_cart($db) {
 function change_product_qty($db) {
     $select_order_id = $_POST['order_id'];
     $select_product_name = $_POST['product_name'];
-    $select_product_qty = mb_convert_kana($_POST['product_qty'], 'n');
+    $select_product_qty = $_POST['product_qty'];
 
     if ((!check_int_0($select_product_qty)) or ($select_product_qty == 0)) {
         err_msg('注文数を1以上の整数にしてください');
@@ -705,9 +714,10 @@ function get_list_thankyou($db) {
 function get_list_history($db) {
     $user_id = $_SESSION['user_id'];
 
-    $sql_cart = "SELECT cart_id, create_date FROM " . DB_CART . " 
+    $sql_cart = "SELECT cart_id, update_date FROM " . DB_CART . " 
     WHERE user_id = " . $user_id . " AND purchased_flg = 1 ORDER BY cart_id DESC";
     $stmt_cart = $db->query($sql_cart);
+
     foreach ($stmt_cart as $row) {
         $price_sum = 0;
         $sql_order = "SELECT " . DB_ORDER . ".product_id, " . DB_ORDER . ".product_qty, " 
@@ -717,10 +727,9 @@ function get_list_history($db) {
         LEFT JOIN " . DB_IMAGE . " USING(product_id) LEFT JOIN " . DB_STOCK . " USING(product_id) 
         WHERE cart_id = " . $row['cart_id'] . " ORDER BY order_id";
         $stmt_order = $db->query($sql_order);
-
         echo '<table class="history_list">';
         echo '<tr><td colspan="4" class="borderless"><div class="history_list_left purple_text">
-        ご注文日：' . date('Y年m月d日' ,strtotime($row['create_date'])) . '</div></td></tr>';
+        ご注文日：' . date('Y年m月d日' ,strtotime($row['update_date'])) . '</div></td></tr>';
         foreach ($stmt_order as $row2) {
             echo '<tr>
                 <td><a href="../ec_site/img/' . $row2['image_name'] . '" target="_blank">
