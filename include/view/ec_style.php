@@ -38,6 +38,10 @@
         font-size: 18px;
     }
 
+    p {
+        margin: 0;
+    }
+
     a {
         color: inherit;
     }
@@ -336,6 +340,11 @@
     .history_list_right {
         text-align: right;
         font-size: 22px;
+    }
+
+    .caution_msg_bottom {
+        height: 18px;
+        margin-bottom: 12px;
     }
 
 </style>

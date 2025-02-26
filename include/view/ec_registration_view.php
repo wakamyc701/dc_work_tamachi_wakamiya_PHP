@@ -27,4 +27,7 @@
             </div>
         </main>
     </body>
+    <?php
+    include_once ('../../include/view/ec_form_check.php');
+    ?>
 </html>

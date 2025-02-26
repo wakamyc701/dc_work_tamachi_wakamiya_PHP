@@ -6,6 +6,7 @@
         include_once ('../../include/view/ec_style.php');
         ?>
         <title>わぁ！菓子屋さん本舗｜トップページ</title>
+
     </head>
     <body>
         <?php
@@ -23,4 +24,7 @@
             </div>
         </main>
     </body>
+    <?php
+    include_once ('../../include/view/ec_form_check.php');
+    ?>
 </html>
