@@ -316,9 +316,10 @@ function get_list_manage($db) {
                 <img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
                 <td>' . $row['product_name'] . '</td>
                 <td>' . $row['price'] . '</td>
-                <td><input type="number" class="input_value" name="stock_qty" 
-                value="' .$row['stock_qty'] . '" min="0">
-                <button name="post_form" value="change_stock_qty">在庫数変更</button></td>';
+                <td><input type="text" class="input_value" name="stock_qty" 
+                value="' .$row['stock_qty'] . '">
+                <button name="post_form" value="change_stock_qty">在庫数変更</button>
+                <p class="red_text small_text input_check_msg"></p></td>';
                 if ($row['public_flg'] == 1) {
                     echo '<td><input type="hidden" name="next_flg" value="0">
                     <button name="post_form" value="change_public_flg">非公開にする</button></td>';
