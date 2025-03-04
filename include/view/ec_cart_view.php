@@ -22,4 +22,8 @@
             </div>
         </main>
     </body>
+    <?php
+    include_once ('../../include/view/ec_cart_check.php');
+    ?>
+
 </html>
