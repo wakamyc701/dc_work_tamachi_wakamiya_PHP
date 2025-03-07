@@ -316,10 +316,10 @@ function get_list_manage($db) {
                 <img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
                 <td>' . $row['product_name'] . '</td>
                 <td>' . $row['price'] . '</td>
-                <td><input type="number" class="input_value" name="stock_qty" 
+                <td><input type="number" class="input_value change_stock_form" name="stock_qty" 
                 value="' .$row['stock_qty'] . '" min="0">
-                <button name="post_form" value="change_stock_qty">在庫数変更</button>
-                <p class="red_text small_text input_check_msg"></p></td>';
+                <button class="change_stock_btn" name="post_form" value="change_stock_qty">在庫数変更</button>
+                <p class="red_text small_text change_stock_check_msg"></p></td>';
                 if ($row['public_flg'] == 1) {
                     echo '<td><input type="hidden" name="next_flg" value="0">
                     <button name="post_form" value="change_public_flg">非公開にする</button></td>';
@@ -559,10 +559,10 @@ function get_list_cart($db) {
                 <td>' . $row['product_name'] . '</td>
                 <td>価格：' . $row['price'] . '円</td>
                 <td><p class="small_text red_text">' . $row['stock_qty'] . '点まで注文できます</p>
-                注文数<input type="number" class="input_value" name="product_qty" 
+                注文数<input type="number" class="input_value change_qty_form" name="product_qty" 
                 value="' .$row['product_qty'] . '" min="1" max="' . $row['stock_qty'] . '">
-                <button name="post_form" value="change_product_qty">注文数変更</button>
-                <p class="red_text small_text input_check_msg"></p></td>
+                <button class="change_qty_btn" name="post_form" value="change_product_qty">注文数変更</button>
+                <p class="red_text small_text change_qty_check_msg"></p></td>
                 <td><button name="post_form" value="del_order">カートから削除</button></td>
             </tr>
         </form>';

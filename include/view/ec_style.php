@@ -214,6 +214,10 @@
         vertical-align: middle;
     }
 
+    .form_btn:disabled {
+        color: #723499;
+    } 
+
     .input_value {
         width: 60px;
     }
