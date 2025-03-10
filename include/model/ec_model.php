@@ -102,6 +102,9 @@ function login_check($db){
         $user_name = h($_POST['user_name']);
         $user_password = h($_POST['user_password']);
 
+        if (validate_name($user_name) === 0) return;
+        if (validate_pwd($user_password) === 0) return;
+
         $sql = "SELECT user_id, user_password FROM " . DB_USER . " 
         WHERE user_name = :user_name LIMIT 1";
         $stmt = $db->prepare($sql);
@@ -140,31 +143,28 @@ function user_registration($db) {
         $user_name = $_POST['user_name'];
         $user_password = $_POST['user_password'];
 
-        if (!preg_match("/^\w{5,}$/", $user_name)) {    //ユーザー名のバリデーションチェック
-            err_msg('登録できないユーザー名です。');
-        } elseif (!preg_match("/^\w{8,}$/", $user_password)) {  //パスワードのバリデーションチェック
-            err_msg('登録できないパスワードです。');
-        } else {
-            $sql = "INSERT INTO " .DB_USER. " (user_name, user_password, create_date, update_date) 
-            VALUES (:user_name, :user_password, '" . get_date() . "', '" . get_date() . "' )";
+        if (validate_name($user_name) === 0) return;
+        if (validate_pwd($user_password) === 0) return;
 
-            try {
-                $stmt = $db->prepare($sql);
+        $sql = "INSERT INTO " .DB_USER. " (user_name, user_password, create_date, update_date) 
+        VALUES (:user_name, :user_password, '" . get_date() . "', '" . get_date() . "' )";
 
-                $stmt -> bindValue(':user_name', $user_name);
-                $stmt -> bindValue(':user_password', $user_password);
+        try {
+            $stmt = $db->prepare($sql);
 
-                $stmt->execute();
-                suc_msg('ユーザー登録が完了しました。');
-                header('Location: ./registration.php');
-                exit();
-            } catch (PDOException $e){
-                $errinfo = $db->errorInfo();
-                if ($errinfo[1] == '1062') {    //既に存在するユーザー名と重複
-                    err_msg('登録できないユーザー名です。');
-                } else {
-                    err_msg('申し訳ございません。再度お試しください。');
-                }
+            $stmt -> bindValue(':user_name', $user_name);
+            $stmt -> bindValue(':user_password', $user_password);
+
+            $stmt->execute();
+            suc_msg('ユーザー登録が完了しました。');
+            header('Location: ./registration.php');
+            exit();
+        } catch (PDOException $e){
+            $errinfo = $db->errorInfo();
+            if ($errinfo[1] == '1062') {    //既に存在するユーザー名と重複
+                err_msg('登録できないユーザー名です。');
+            } else {
+                err_msg('申し訳ございません。再度お試しください。');
             }
         }
     }
@@ -553,6 +553,7 @@ function get_list_cart($db) {
         echo '<form method="post">
             <input type="hidden" name="order_id" value="' .$row['order_id'] . '">
             <input type="hidden" name="product_name" value="' .$row['product_name'] . '">
+            <input type="hidden" name="stock_qty" value="' .$row['stock_qty'] . '">
             <tr>
                 <td><a href="../ec_site/img/' . $row['image_name'] . '" target="_blank">
                 <img src="../ec_site/img/' . $row['image_name'] . '"></a></td>
@@ -606,9 +607,12 @@ function change_product_qty($db) {
     $select_order_id = $_POST['order_id'];
     $select_product_name = $_POST['product_name'];
     $select_product_qty = $_POST['product_qty'];
+    $select_stock_qty = $_POST['stock_qty'];
 
-    if ((!check_int_0($select_product_qty)) or ($select_product_qty == 0)) {
-        err_msg('注文数を1以上の整数にしてください');
+    if ((!check_int_0($select_product_qty))
+     or ($select_product_qty == 0)
+     or ($select_product_qty > $select_stock_qty)) {
+        err_msg('注文数を1～' . $select_stock_qty . 'の整数にしてください');
         return;
     }
 
@@ -759,5 +763,39 @@ function get_list_history($db) {
         echo '<tr><td colspan="4" class="borderless"><div class="history_list_right purple_text">
         小計：　' . $price_sum . '円</div></td></tr>';
         echo '</table>';
+    }
+}
+
+/**
+ * ユーザー名のバリデーションチェック
+ * index.php、registration.phpにて使用
+ * 
+ * @param string
+ * @return int 1もしくは0
+ */
+
+function validate_name($str) {
+    if (preg_match("/^\w{5,}$/", $str) === 0) {
+        err_msg('ユーザー名は「5文字以上」かつ「半角英数字とアンダースコア」で入力してください');
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+/**
+ * パスワードのバリデーションチェック
+ * index.php、registration.phpにて使用
+ * 
+ * @param string
+ * @return int 1もしくは0
+ */
+
+ function validate_pwd($str) {
+    if (preg_match("/^\w{8,}$/", $str) === 0) {
+        err_msg('パスワードは「8文字以上」かつ「半角英数字とアンダースコア」で入力してください');
+        return 0;
+    } else {
+        return 1;
     }
 }
