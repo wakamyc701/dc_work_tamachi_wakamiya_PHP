@@ -66,24 +66,13 @@
     });
 
     idFileBtn.addEventListener('change', function(){
-        console.log(idFileBtn.value);
         const files = idFileBtn.files;
-        console.log(files);
-        console.log(files[0].type);
-        console.log(files[0].size);
-        if (files[0].type == "image/jpeg" || files[0].type == "image/png") {
-            console.log("type:OK");
-        }
-        if (files[0].size > 0) {
-            console.log("size:OK");
-        }
+        //console.log(files);
         if ((files[0].type == "image/jpeg" || files[0].type == "image/png") && (files[0].size > 0)) {
-            console.log("btn:ON");
             idFileMsg.textContent = '';
             btnFlg3 = 1;
             funcBtn();
         } else {
-            console.log("btn:OFF");
             idFileMsg.textContent = 'JPEGまたはPNG形式のファイルを選択してください';
             btnFlg3 = 0;
             idFormBtn.disabled = true;

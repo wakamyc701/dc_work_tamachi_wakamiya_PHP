@@ -109,7 +109,7 @@ function login_check($db){
         WHERE user_name = :user_name LIMIT 1";
         $stmt = $db->prepare($sql);
 
-        $stmt -> bindValue(':user_name', $user_name);
+        $stmt->bindValue(':user_name', $user_name);
 
         $stmt->execute();
         $result = $stmt->fetch();
@@ -146,6 +146,17 @@ function user_registration($db) {
         if (validate_name($user_name) === 0) return;
         if (validate_pwd($user_password) === 0) return;
 
+        //登録済みのユーザー名と重複するか確認
+        $sql_check = "SELECT 1 FROM " .DB_USER. " WHERE user_name = :user_name LIMIT 1";
+        $stmt_check = $db->prepare($sql_check);
+        $stmt_check -> bindValue(':user_name', $user_name);
+        $stmt_check->execute();
+        $result_check = $stmt_check->fetch();
+        if ($result_check !== false) {
+            err_msg('既に使用されているユーザー名です。別のユーザー名でご登録ください。');
+            return;
+        }
+
         $sql = "INSERT INTO " .DB_USER. " (user_name, user_password, create_date, update_date) 
         VALUES (:user_name, :user_password, '" . get_date() . "', '" . get_date() . "' )";
 
@@ -160,12 +171,7 @@ function user_registration($db) {
             header('Location: ./registration.php');
             exit();
         } catch (PDOException $e){
-            $errinfo = $db->errorInfo();
-            if ($errinfo[1] == '1062') {    //既に存在するユーザー名と重複
-                err_msg('登録できないユーザー名です。');
-            } else {
-                err_msg('申し訳ございません。再度お試しください。');
-            }
+            err_msg('申し訳ございません。再度お試しください。');
         }
     }
 }
@@ -560,8 +566,9 @@ function get_list_cart($db) {
                 <td>' . $row['product_name'] . '</td>
                 <td>価格：' . $row['price'] . '円</td>
                 <td><p class="small_text red_text">' . $row['stock_qty'] . '点まで注文できます</p>
-                注文数<input type="number" class="input_value change_qty_form" name="product_qty" 
-                value="' .$row['product_qty'] . '" min="1" max="' . $row['stock_qty'] . '">
+                <label for="qty_form_' . $row['order_id'] . '">注文数</label>
+                <input id="qty_form_' . $row['order_id'] . '" type="number" class="input_value change_qty_form" 
+                name="product_qty" value="' .$row['product_qty'] . '" min="1" max="' . $row['stock_qty'] . '">
                 <button class="change_qty_btn" name="post_form" value="change_product_qty">注文数変更</button>
                 <p class="red_text small_text change_qty_check_msg"></p></td>
                 <td><button name="post_form" value="del_order">カートから削除</button></td>
